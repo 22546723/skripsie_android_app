@@ -11,7 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.planthelper.databinding.FragmentSecondBinding;
 
-public class SecondFragment extends Fragment {
+public class SelectWifi extends Fragment {
 
     private FragmentSecondBinding binding;
 
@@ -32,7 +32,7 @@ public class SecondFragment extends Fragment {
         binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
+                NavHostFragment.findNavController(SelectWifi.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
         });

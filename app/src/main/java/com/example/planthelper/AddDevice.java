@@ -11,7 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.planthelper.databinding.FragmentFirstBinding;
 
-public class FirstFragment extends Fragment {
+public class AddDevice extends Fragment {
 
     private FragmentFirstBinding binding;
 
@@ -32,7 +32,7 @@ public class FirstFragment extends Fragment {
         binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(FirstFragment.this)
+                NavHostFragment.findNavController(AddDevice.this)
                         .navigate(R.id.action_FirstFragment_to_SecondFragment);
             }
         });
