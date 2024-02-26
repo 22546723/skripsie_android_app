@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.planthelper.AddDevice"
+        android:name="com.example.planthelper.FirstFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_add_device">
+        tools:layout="@layout/fragment_first">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
@@ -17,9 +17,9 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="com.example.planthelper.SelectWifi"
+        android:name="com.example.planthelper.SecondFragment"
         android:label="@string/second_fragment_label"
-        tools:layout="@layout/fragment_select_wifi">
+        tools:layout="@layout/fragment_second">
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
