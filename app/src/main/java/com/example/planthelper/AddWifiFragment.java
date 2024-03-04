@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link AddWifi#newInstance} factory method to
+ * Use the {@link AddWifiFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddWifi extends Fragment {
+public class AddWifiFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,7 +24,7 @@ public class AddWifi extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public AddWifi() {
+    public AddWifiFragment() {
         // Required empty public constructor
     }
 
@@ -37,8 +37,8 @@ public class AddWifi extends Fragment {
      * @return A new instance of fragment AddWifi.
      */
     // TODO: Rename and change types and number of parameters
-    public static AddWifi newInstance(String param1, String param2) {
-        AddWifi fragment = new AddWifi();
+    public static AddWifiFragment newInstance(String param1, String param2) {
+        AddWifiFragment fragment = new AddWifiFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);

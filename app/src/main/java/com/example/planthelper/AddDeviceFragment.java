@@ -14,7 +14,7 @@ import com.example.planthelper.databinding.FragmentAddDeviceBinding;
 
 import java.util.ArrayList;
 
-public class AddDevice extends Fragment {
+public class AddDeviceFragment extends Fragment {
 
     private FragmentAddDeviceBinding binding;
     private RecyclerView rvDevices;
