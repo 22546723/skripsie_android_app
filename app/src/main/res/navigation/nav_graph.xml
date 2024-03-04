@@ -6,23 +6,17 @@
     app:startDestination="@id/controlPanel">
 
     <fragment
-        android:id="@+id/addWifi"
-        android:name="com.example.planthelper.AddWifiFragment"
-        android:label="fragment_add_wifi"
-        tools:layout="@layout/fragment_add_wifi" />
-    <fragment
         android:id="@+id/controlPanel"
         android:name="com.example.planthelper.ControlPanelFragment"
         android:label="fragment_control_panel"
-        tools:layout="@layout/fragment_control_panel" />
+        tools:layout="@layout/fragment_control_panel" >
+        <action
+            android:id="@+id/action_controlPanel_to_addDeviceFragment"
+            app:destination="@id/addDeviceFragment" />
+    </fragment>
     <fragment
-        android:id="@+id/selectDevice"
-        android:name="com.example.planthelper.SelectDevice"
-        android:label="fragment_select_device"
-        tools:layout="@layout/fragment_select_device" />
-    <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.planthelper.SettingsFragment"
-        android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:id="@+id/addDeviceFragment"
+        android:name="com.example.planthelper.AddDeviceFragment"
+        android:label="fragment_add_device"
+        tools:layout="@layout/fragment_add_device" />
 </navigation>
