@@ -9,19 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="70dp">
 
-        <TextView
-            android:id="@+id/tvDeviceName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerInParent="false"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="20dp"
-            android:layout_toStartOf="@id/btnEditName"
-            android:text="<Device name>"
-            android:textSize="16sp" />
-
         <ImageButton
             android:id="@+id/btnEditName"
             android:layout_width="wrap_content"
@@ -33,5 +20,22 @@
             android:contentDescription="Edit device name button"
             app:srcCompat="@android:drawable/ic_menu_edit"
             app:tint="@color/black" />
+
+        <EditText
+            android:id="@+id/edtDeviceName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginBottom="10dp"
+            android:layout_toStartOf="@+id/btnEditName"
+            android:ems="10"
+            android:inputType="text"
+            android:text="Name" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

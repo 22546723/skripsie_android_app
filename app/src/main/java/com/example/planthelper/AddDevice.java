@@ -1,64 +1,56 @@
 package com.example.planthelper;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AddDevice#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.planthelper.databinding.FragmentAddDeviceBinding;
+
+import java.util.ArrayList;
+
 public class AddDevice extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private FragmentAddDeviceBinding binding;
+    private RecyclerView rvDevices;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    @Override
+    public View onCreateView(
+            @NonNull LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState
+    ) {
 
-    public AddDevice() {
-        // Required empty public constructor
+        binding = FragmentAddDeviceBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AddDevice.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AddDevice newInstance(String param1, String param2) {
-        AddDevice fragment = new AddDevice();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        rvDevices = binding.rvDevices;
+
+        testList();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_device, container, false);
+    private void testList() {
+        ArrayList<AddDeviceModel> addDeviceModelArrayList = new ArrayList<>();
+        addDeviceModelArrayList.add(new AddDeviceModel("test1"));
+        addDeviceModelArrayList.add(new AddDeviceModel("test2"));
+
+        AddDeviceAdapter addDeviceAdapter = new AddDeviceAdapter(this.getContext(),addDeviceModelArrayList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false);
+        rvDevices.setLayoutManager(linearLayoutManager);
+        rvDevices.setAdapter(addDeviceAdapter);
     }
 }
