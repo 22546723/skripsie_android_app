@@ -9,16 +9,16 @@
         android:id="@+id/controlPanel"
         android:name="com.example.planthelper.ControlPanelFragment"
         android:label="fragment_control_panel"
-        tools:layout="@layout/fragment_control_panel" >
-        <action
-            android:id="@+id/action_controlPanel_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_control_panel" />
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.example.planthelper.SettingsFragment"
         android:label="fragment_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_controlPanel"
+            app:destination="@id/controlPanel" />
+    </fragment>
     <action
         android:id="@+id/action_global_settingsFragment"
         app:destination="@id/settingsFragment" />
