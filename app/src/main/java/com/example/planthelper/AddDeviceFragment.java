@@ -44,13 +44,13 @@ public class AddDeviceFragment extends Fragment {
     }
 
     private void testList() {
-        ArrayList<AddDeviceModel> addDeviceModelArrayList = new ArrayList<>();
-        addDeviceModelArrayList.add(new AddDeviceModel("test1"));
-        addDeviceModelArrayList.add(new AddDeviceModel("test2"));
+//        ArrayList<AddDeviceModel> addDeviceModelArrayList = new ArrayList<>();
+//        addDeviceModelArrayList.add(new AddDeviceModel("test1"));
+//        addDeviceModelArrayList.add(new AddDeviceModel("test2"));
 
-        AddDeviceAdapter addDeviceAdapter = new AddDeviceAdapter(this.getContext(),addDeviceModelArrayList);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false);
-        rvDevices.setLayoutManager(linearLayoutManager);
-        rvDevices.setAdapter(addDeviceAdapter);
+        //AddDeviceAdapter addDeviceAdapter = new AddDeviceAdapter(this.getContext(),addDeviceModelArrayList);
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false);
+//        rvDevices.setLayoutManager(linearLayoutManager);
+//        rvDevices.setAdapter(addDeviceAdapter);
     }
 }

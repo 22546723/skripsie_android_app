@@ -21,6 +21,7 @@ public class ControlPanelFragment extends Fragment {
     private FragmentControlPanelBinding binding;
     private GraphView graphView;
 
+
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
@@ -36,6 +37,8 @@ public class ControlPanelFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         graphView = binding.idGraphView;
+
+
         testGraph();
     }
 

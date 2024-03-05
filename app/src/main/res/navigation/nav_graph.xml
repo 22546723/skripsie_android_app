@@ -11,12 +11,15 @@
         android:label="fragment_control_panel"
         tools:layout="@layout/fragment_control_panel" >
         <action
-            android:id="@+id/action_controlPanel_to_addDeviceFragment"
-            app:destination="@id/addDeviceFragment" />
+            android:id="@+id/action_controlPanel_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
-        android:id="@+id/addDeviceFragment"
-        android:name="com.example.planthelper.AddDeviceFragment"
-        android:label="fragment_add_device"
-        tools:layout="@layout/fragment_add_device" />
+        android:id="@+id/settingsFragment"
+        android:name="com.example.planthelper.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
+    <action
+        android:id="@+id/action_global_settingsFragment"
+        app:destination="@id/settingsFragment" />
 </navigation>
