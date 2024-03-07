@@ -1,27 +1,17 @@
 package com.example.planthelper;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.MenuHost;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.planthelper.databinding.FragmentAddDeviceBinding;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import com.example.planthelper.databinding.FragmentControlPanelBinding;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
-
-import java.util.Objects;
 
 public class ControlPanelFragment extends Fragment {
 
@@ -37,12 +27,11 @@ public class ControlPanelFragment extends Fragment {
 
         binding = FragmentControlPanelBinding.inflate(inflater, container, false);
 
-        Log.i("MYDEBUG", "control view created");
-
         MainActivity.setMenuItemVis(true);
         if (MainActivity.getMenuCreated())
             requireActivity().invalidateOptionsMenu();
 
+        requireActivity().setTitle("Control panel");
 
         return binding.getRoot();
 
@@ -52,7 +41,6 @@ public class ControlPanelFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
 
-
         testGraph();
     }
 
@@ -61,13 +49,9 @@ public class ControlPanelFragment extends Fragment {
         super.onDestroyView();
         MainActivity.setMenuItemVis(false);
         requireActivity().invalidateOptionsMenu();
-        Log.i("MYDEBUG", "control view destroyed");
 
         binding = null;
     }
-
-
-
 
     private void testGraph() {
         LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{

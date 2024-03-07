@@ -1,32 +1,19 @@
 package com.example.planthelper;
 
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.util.Log;
-import android.view.MenuInflater;
-import android.view.View;
-
-import androidx.core.view.MenuProvider;
-import androidx.core.view.WindowCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.example.planthelper.databinding.ActivityMainBinding;
-
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
+import com.example.planthelper.databinding.ActivityMainBinding;
+
 public class MainActivity extends AppCompatActivity {
 
-    private AppBarConfiguration appBarConfiguration;
-    private ActivityMainBinding binding;
     private static boolean menuVisible = true;
     private static boolean menuCreated = false;
 
@@ -34,20 +21,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        com.example.planthelper.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         setSupportActionBar(binding.toolbar);
+        ActionBar actionBar = getSupportActionBar();
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+        assert actionBar != null;
+        actionBar.setHomeButtonEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
+
+
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                //do nothing
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        Log.i("MYDEBUG", "on create menu start");
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menuCreated = true;
         return true;
@@ -64,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
             navController.navigate(R.id.action_global_settingsFragment);
-            //setMenuItemVis(false);
             return true;
         }
 
@@ -72,17 +68,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        return NavigationUI.navigateUp(navController, appBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-
-        @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        Log.i("MYDEBUG", "on prepare start");
         MenuItem menuItem = menu.findItem(R.id.action_settings);
         menuItem.setVisible(menuVisible);
 
@@ -90,13 +78,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static void setMenuItemVis(boolean setTo) {
-        Log.i("MYDEBUG", "set vis in main");
         menuVisible = setTo;
     }
 
     public static boolean getMenuCreated() {
         return menuCreated;
     }
-
 
 }

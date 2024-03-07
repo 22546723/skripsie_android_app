@@ -37,7 +37,7 @@ public class SettingsFragment extends Fragment {
     ) {
 
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
-
+        requireActivity().setTitle("Settings");
         return binding.getRoot();
 
     }

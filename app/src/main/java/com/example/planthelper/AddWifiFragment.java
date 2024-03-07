@@ -1,6 +1,11 @@
 package com.example.planthelper;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -8,14 +13,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-
 import com.example.planthelper.databinding.FragmentAddWifiBinding;
-import com.example.planthelper.databinding.FragmentSettingsBinding;
 
 public class AddWifiFragment extends Fragment {
     private FragmentAddWifiBinding binding;
@@ -29,7 +27,9 @@ public class AddWifiFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
+
         binding = FragmentAddWifiBinding.inflate(inflater, container, false);
+        requireActivity().setTitle("WiFi setup");
         return binding.getRoot();
 
     }
