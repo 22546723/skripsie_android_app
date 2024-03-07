@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_settingsFragment_to_addDeviceFragment"
             app:destination="@id/addDeviceFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_addWifiFragment"
+            app:destination="@id/addWifiFragment" />
     </fragment>
     <action
         android:id="@+id/action_global_settingsFragment"

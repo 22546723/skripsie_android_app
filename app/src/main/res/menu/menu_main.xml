@@ -1,6 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_menu"
     tools:context="com.example.planthelper.MainActivity">
     <item
         android:id="@+id/action_settings"
@@ -11,5 +12,6 @@
         android:icon="@android:drawable/ic_menu_edit"
         android:orderInCategory="100"
         android:title="@string/action_settings"
+        android:visibility="visible"
         app:showAsAction="always" />
 </menu>

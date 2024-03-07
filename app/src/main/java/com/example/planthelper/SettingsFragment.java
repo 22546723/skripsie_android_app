@@ -25,6 +25,10 @@ public class SettingsFragment extends Fragment {
     private EditText edtName;
     private TextView tvWifi;
 
+//    public SettingsFragment() {
+//
+//    }
+
 
     @Override
     public View onCreateView(
@@ -33,12 +37,15 @@ public class SettingsFragment extends Fragment {
     ) {
 
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
+
         return binding.getRoot();
 
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
 
         btnSave = binding.btnSaveSettings;
         btnDelete = binding.btnDeleteDevice;
@@ -47,12 +54,21 @@ public class SettingsFragment extends Fragment {
         edtName = binding.edtDeviceName;
         tvWifi = binding.tvWifiName;
 
+        ibtnWifi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavController navController = Navigation.findNavController(v);
+                navController.navigate(R.id.action_settingsFragment_to_addWifiFragment);
+            }
+        });
+
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Todo: Add code to store data
                 NavController navController = Navigation.findNavController(v);
                 navController.navigate(R.id.action_settingsFragment_to_controlPanel);
+                MainActivity.setMenuItemVis(true);
             }
         });
 
