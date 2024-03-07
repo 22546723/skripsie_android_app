@@ -68,7 +68,7 @@ public class SettingsFragment extends Fragment {
                 //Todo: Add code to store data
                 NavController navController = Navigation.findNavController(v);
                 navController.navigate(R.id.action_settingsFragment_to_controlPanel);
-                MainActivity.setMenuItemVis(true);
+                //MainActivity.setMenuItemVis(true);
             }
         });
 

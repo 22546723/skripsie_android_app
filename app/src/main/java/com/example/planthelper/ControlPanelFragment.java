@@ -21,6 +21,8 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.util.Objects;
+
 public class ControlPanelFragment extends Fragment {
 
     private FragmentControlPanelBinding binding;
@@ -35,35 +37,20 @@ public class ControlPanelFragment extends Fragment {
 
         binding = FragmentControlPanelBinding.inflate(inflater, container, false);
 
+        Log.i("MYDEBUG", "control view created");
 
-        Log.i("MYDEBUG", "1");
+        MainActivity.setMenuItemVis(true);
+        if (MainActivity.getMenuCreated())
+            requireActivity().invalidateOptionsMenu();
+
+
         return binding.getRoot();
 
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        Log.i("MYDEBUG", "2");
-//        MenuHelper menuHelper = new MenuHelper();
-//        menuHelper.setMenuVis(true);
-
-
         graphView = binding.idGraphView;
-//        Log.i("MYDEBUG", "cp 1");
-//        toolbar = view.findViewById(R.id.toolbar);
-//
-//        int temp = toolbar.getId();
-//        if (temp == -1)
-//            Log.i("MYDEBUG", "no toolbar id");
-//        else
-//            Log.i("MYDEBUG", String.valueOf(temp));
-
-
-       // Log.i("MYDEBUG", String.valueOf(toolbar.getId()));
-//        Log.i("MYDEBUG", "cp 2");
-//        toolbar.inflateMenu(R.menu.menu_main);
-//        Log.i("MYDEBUG", "cp 3");
 
 
         testGraph();
@@ -72,9 +59,9 @@ public class ControlPanelFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-//        Log.i("MYDEBUG", "cp 4");
-//        toolbar.getMenu().clear();
-//        Log.i("MYDEBUG", "cp 5");
+        MainActivity.setMenuItemVis(false);
+        requireActivity().invalidateOptionsMenu();
+        Log.i("MYDEBUG", "control view destroyed");
 
         binding = null;
     }
@@ -117,32 +104,4 @@ public class ControlPanelFragment extends Fragment {
 
 
 
-//
-////    @Override
-////    public boolean onPrepareOptionsMenu(Menu menu) {
-////        // Inflate the menu; this adds items to the action bar if it is present.
-////
-////        getMenuInflater().inflate(R.menu.menu_main, menu);
-////        menuItem = menu.findItem(R.id.action_settings);
-////        String test = String.valueOf(menuItem.getItemId());
-////        Log.i("MYDEBUG", test);
-////        return true;
-////    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-//            navController.navigate(R.id.action_global_settingsFragment);
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
 }

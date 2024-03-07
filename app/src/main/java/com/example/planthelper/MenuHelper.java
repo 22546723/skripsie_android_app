@@ -16,21 +16,21 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.planthelper.databinding.ActivityMainBinding;
 
-public class MenuHelper extends MainActivity { // AppCompatActivity {
-    public MenuItem settings_item;
-    private AppBarConfiguration appBarConfiguration;
-    private boolean menuVisible;
-    private Activity activity;
+public class MenuHelper extends MainActivity {
 
     public MenuHelper() {
-        Log.i("MYDEBUG", "meep");
+        Log.i("MYDEBUG", "menu helper init");
     }
 
     public void setMenuVis(boolean setTo) {
-        this.menuVisible = setTo;
-        Log.i("MYDEBUG", "please get to here");
+        Log.i("MYDEBUG", "set menu vis in helper start");
         setMenuItemVis(setTo);
-        invalidateOptionsMenu();
+//
+//        if (MainActivity.getMenuCreated()) {
+//            Log.i("MYDEBUG", "menu exists");
+//            invalidateOptionsMenu();
+//        }
+
     }
 
 }
