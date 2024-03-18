@@ -1,5 +1,9 @@
 package com.example.planthelper;
 
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ENABLE_BT = 1;
     private static boolean menuVisible = true;
     private static boolean menuCreated = false;
 
@@ -85,6 +90,11 @@ public class MainActivity extends AppCompatActivity {
 
     public static boolean getMenuCreated() {
         return menuCreated;
+    }
+
+    public void startBluetooth() {
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
     }
 
 }

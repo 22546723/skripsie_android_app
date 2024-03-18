@@ -57,27 +57,27 @@ public class ControlPanelFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
 
-        db = FirebaseFirestore.getInstance();
-        readFirestoreData();
-
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("test");
-
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String value = snapshot.getValue(String.class);
-                Log.d(TAG, "Value is: " + value);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
+//        db = FirebaseFirestore.getInstance();
+//        readFirestoreData();
+//
+//        database = FirebaseDatabase.getInstance();
+//        myRef = database.getReference("test");
+//
+//        myRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                // This method is called once with the initial value and again
+//                // whenever data at this location is updated.
+//                String value = snapshot.getValue(String.class);
+//                Log.d(TAG, "Value is: " + value);
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                // Failed to read value
+//                Log.w(TAG, "Failed to read value.", error.toException());
+//            }
+//        });
 
         testGraph();
     }
