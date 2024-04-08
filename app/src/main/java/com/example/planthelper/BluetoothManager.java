@@ -2,6 +2,9 @@ package com.example.planthelper;
 
 import static androidx.core.app.ActivityCompat.startActivityForResult;
 
+//import static com.example.planthelper.MainActivity.REQUEST_ENABLE_BT;
+
+import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -11,18 +14,25 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.util.Log;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,7 +54,9 @@ import java.util.List;
 //    }
 //}
 
+@RequiresApi(api = Build.VERSION_CODES.S)
 public class BluetoothManager extends AppCompatActivity {
+    private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner bluetoothLeScanner;
     private Handler handler = new Handler();
@@ -55,6 +67,14 @@ public class BluetoothManager extends AppCompatActivity {
     private BluetoothDevice device;
     private ScanFilter scanFilter;
     private ScanSettings scanSettings;
+
+    private Context context;
+    private Activity activity;
+
+//    private String[] permissionNames = {Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.BLUETOOTH_CONNECT};
+    private String[] permissionNames = {android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.BLUETOOTH_CONNECT};
+    private static int[] permissionStatus = {0, 0, 0};
+
 
     private final String SERVICE_UUID_SCAN = "e1f6fa49-170d-4629-bd77-ea170a0309dc";
     private final String CHARACTERISTIC_UUID_SCAN = "27ce423b-bcc6-4fe7-aa98-0d502e79f15a";
@@ -71,19 +91,35 @@ public class BluetoothManager extends AppCompatActivity {
     private final String CHARACTERISTIC_UUID_DEVICE = "9fbf707f-c39a-418a-828c-6e291af51ac4";
 
 
-    public BluetoothManager() {//Activity activity) {
+    public BluetoothManager(Context c, Activity a) {
         //init
+        this.context = c;
+        this.activity = a;
+        if (c == null)
+            Log.i("MINE", "empty context");
+
+        for (int i = 0; i < permissionNames.length; i++) {
+            checkPermission(permissionNames[i], i);
+        }
 
         // filter scan results to contain the scan service uuid
         ScanFilter.Builder scanBuilder = new ScanFilter.Builder();
         scanBuilder.setServiceUuid(ParcelUuid.fromString(SERVICE_UUID_SCAN));
         scanFilter = scanBuilder.build();
 
+        if (scanFilter == null) {
+            Log.i("MINE", "scanFilter is null");
+        }
+
         // set scan mode to balanced (doesn't really make a difference but we need scan settings to
         // be able to use the filter)
         ScanSettings.Builder settingsBuilder = new ScanSettings.Builder();
         settingsBuilder.setScanMode(ScanSettings.SCAN_MODE_BALANCED);
         scanSettings = settingsBuilder.build();
+
+        if (scanSettings == null) {
+            Log.i("MINE", "scanSettings is null");
+        }
 
 
         // setup bt adapter
@@ -94,17 +130,27 @@ public class BluetoothManager extends AppCompatActivity {
             hasScanner = true;
         } else {
             // Show turn on BT message
+            Log.i("MINE", "bt not turned on");
+//            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+////            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+//
+//            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(enableBtIntent), new ActivityResultCallback<>() {
+//                @Override
+//                public void onActivityResult(Object o) {
+//                    Log.i("MINE", "bt on requested");
+//                }
+//            });
         }
     }
 
-    private void scanForDevice() {
+    public void scanForDevice() {
         if (!scanning) {
             // add a runnable to the handler that checks bt permission and stops the BT scan after SCAN_PERIOD milliseconds
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     scanning = false;
-                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
                         //    ActivityCompat#requestPermissions
                         // here to request the missing permissions, and then overriding
@@ -112,6 +158,8 @@ public class BluetoothManager extends AppCompatActivity {
                         //                                          int[] grantResults)
                         // to handle the case where the user grants the permission. See the documentation
                         // for ActivityCompat#requestPermissions for more details.
+                        ActivityCompat.requestPermissions(activity, new String[] { permissionNames[0] }, 0);
+                        Log.i("MINE", "no bt permission");
                         return;
                     }
                     bluetoothLeScanner.stopScan(leScanCallback);
@@ -175,6 +223,31 @@ public class BluetoothManager extends AppCompatActivity {
 
         return connected;
     }
+
+    public void checkPermission(String permission, int requestCode)
+    {
+
+        // Checking if permission is not granted
+
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(activity, new String[] { permission }, requestCode);
+        }
+        else {
+            Toast.makeText(context, "Permission already granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        permissionStatus[requestCode] = grantResults[0];
+    }
+
+
 }
 
 //#define SERVICE_UUID_SCAN             "e1f6fa49-170d-4629-bd77-ea170a0309dc"
