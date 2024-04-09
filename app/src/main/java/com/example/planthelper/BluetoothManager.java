@@ -35,7 +35,6 @@ public class BluetoothManager extends AppCompatActivity {
     private BluetoothLeScanner bluetoothLeScanner;
     private final Handler handler = new Handler();
     private boolean scanning = false;
-    private BluetoothLeService bluetoothLeService;
     private BluetoothDevice device;
     private final ScanFilter scanFilter;
     private final ScanSettings scanSettings;
@@ -139,7 +138,8 @@ public class BluetoothManager extends AppCompatActivity {
                         return;
                     }
                     bluetoothLeScanner.stopScan(leScanCallback);
-                    Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
+                    if (!isConnected)
+                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
                 }
             }, SCAN_PERIOD);
 
@@ -276,8 +276,11 @@ public class BluetoothManager extends AppCompatActivity {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            Log.i("MINE", "at gatt callback");
+            Log.i("MINE", String.valueOf(newState));
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
+                Log.i("MINE", "at gatt callback - connected");
                 isConnected = true;
                 Toast.makeText(context, "Connected to Plant Helper", Toast.LENGTH_SHORT).show();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {

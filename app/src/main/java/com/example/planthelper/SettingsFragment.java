@@ -25,9 +25,6 @@ public class SettingsFragment extends Fragment {
     private EditText edtName;
     private TextView tvWifi;
 
-//    public SettingsFragment() {
-//
-//    }
 
 
     @Override
