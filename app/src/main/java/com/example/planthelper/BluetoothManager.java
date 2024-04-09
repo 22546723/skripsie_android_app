@@ -83,7 +83,7 @@ public class BluetoothManager extends AppCompatActivity {
         }
 
         // filter scan results to the device id
-        // TODO:
+        // TODO: replace device id with service uuid
         ScanFilter.Builder scanBuilder = new ScanFilter.Builder();
         scanBuilder.setDeviceAddress("40:4C:CA:41:59:0E");
         scanFilter = scanBuilder.build();
@@ -92,8 +92,9 @@ public class BluetoothManager extends AppCompatActivity {
             Log.i("MINE", "scanFilter is null");
         }
 
-        // set scan mode to balanced (doesn't really make a difference but we need scan settings to
-        // be able to use the filter)
+        // set scan mode to low latency (the scan is only running for +- 15sec)
+        // set the callback type to first match to avoid getting callbacks multiple times for each
+        // detected device
         ScanSettings.Builder settingsBuilder = new ScanSettings.Builder();
         settingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
         settingsBuilder.setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH);
@@ -110,33 +111,35 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         } else {
             // Show turn on BT message
+            // TODO: turn on bt automatically instead of showing a toast message
+            Toast.makeText(context, "Please enable Bluetooth to continue.", Toast.LENGTH_SHORT).show();
             Log.i("MINE", "bt not turned on");
         }
     }
 
+
+    /**
+     * Scan for and connect to the esp32
+     * <p>
+     * Initialises the bt scan that connects to the esp32 on detection.
+     * @see #leScanCallback
+     */
     public void scanForDevice() {
         if (!scanning) {
+            long SCAN_PERIOD = 10000; // 10 sec
+
             // add a runnable to the handler that checks bt permission and stops the BT scan after SCAN_PERIOD milliseconds
-            // 10 sec
-            long SCAN_PERIOD = 15000;
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     scanning = false;
+                    // permission check and request
                     if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
                         ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
-                        Log.i("MINE", "no bt permission");
                         return;
                     }
                     bluetoothLeScanner.stopScan(leScanCallback);
-                    Log.i("MINE", "bt scan timeout");
+                    Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
                 }
             }, SCAN_PERIOD);
 
@@ -150,82 +153,37 @@ public class BluetoothManager extends AppCompatActivity {
         }
     }
 
-    // bt scan callback
-    // so far it just returns the detected device
-    private final ScanCallback leScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-            // Add on result code here
 
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            bluetoothLeScanner.stopScan(leScanCallback);
-
-            String temp = result.toString();
-            Log.i("MINE", temp);
-
-            device = result.getDevice();
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            bluetoothGatt = device.connectGatt(context, false, gattCallback);
-
-        }
-    };
-
-    private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                // successfully connected to the GATT Server
-                isConnected = true;
-                Log.i("MINE", "connected to esp");
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                // disconnected from the GATT Server
-                isConnected = false;
-            }
-        }
-    };
-
-
-    // returns true if phone is connected to the esp32
+    /**
+     * Get bt connection status
+     *
+     * @return Bt connection status (true if connected, false if not)
+     */
     public boolean checkConnected() {
         return isConnected;
     }
 
-    // return the esp32 device name
+
+    /**
+     * Get the name of the connected device
+     *
+     * @return Device name
+     */
     public String readName() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return "";
+            ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
+            return "Name not found";
         }
 
         return device.getName();
     }
 
-    // read wifi names from the esp32
+
+    /**
+     * Read the WiFi network names sent by the esp32
+     *
+     * @return List of network names
+     */
     public List<String> readNetworks() {
         List<String> networks = new ArrayList<>();
 
@@ -236,35 +194,98 @@ public class BluetoothManager extends AppCompatActivity {
         return networks;
     }
 
-    // send the selected wifi name and password to the esp
+
+    /**
+     * Send the selected wifi name and password to the esp32
+     *
+     * @param ssid Network name.
+     * @param password Network password.
+     * @return WiFi connection status (true if connected, false if not)
+     */
     public boolean connectWifi(String ssid, String password) {
         boolean connected = false;
 
         return connected;
     }
 
-    public void checkPermission(String permission, int requestCode)
-    {
-
-        // Checking if permission is not granted
-
+    /**
+     * Check and request permissions.
+     * <p>
+     * Permission names and request codes correspond to the permissionNames array
+     *
+     * @param permission Permission to check.
+     * @param requestCode Permission request code.
+     */
+    public void checkPermission(String permission, int requestCode) {
         if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(activity, new String[] { permission }, requestCode);
         }
-        else {
-            Toast.makeText(context, "Permission already granted", Toast.LENGTH_SHORT).show();
-        }
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         permissionStatus[requestCode] = grantResults[0];
     }
 
+
+    /**
+     * Bluetooth LE scan callback.
+     * <p>
+     * Connects to the esp32 and stops the running bt scan on detection.
+     * @see #gattCallback
+     */
+    private final ScanCallback leScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+
+            // permission checks and requests
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
+                return;
+            }
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
+                return;
+            }
+
+            bluetoothLeScanner.stopScan(leScanCallback);
+
+            String temp = result.toString();
+            Log.i("MINE", temp);
+            // TODO: remove this ^
+
+            // connect to the esp32
+            device = result.getDevice();
+            bluetoothGatt = device.connectGatt(context, false, gattCallback);
+        }
+    };
+
+
+    /**
+     * Bluetooth gatt callback.
+     * <p>
+     * Called when connecting to the esp32. Updates the connection status.
+     */
+    private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                // successfully connected to the GATT Server
+                isConnected = true;
+                Toast.makeText(context, "Connected to Plant Helper", Toast.LENGTH_SHORT).show();
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                // disconnected from the GATT Server
+                isConnected = false;
+                Toast.makeText(context, "Plant Helper disconnected", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
 }
