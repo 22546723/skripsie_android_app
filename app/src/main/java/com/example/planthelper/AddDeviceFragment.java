@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +49,8 @@ public class AddDeviceFragment extends Fragment {
         btnScan = binding.btnAddScan;
         tvDevice = binding.tvDetectedDevice;
 
+        tvDevice.setText("No device connected.");
+
         btnContinue.setEnabled(false);
         btnScan.setEnabled(true);
 
@@ -75,12 +78,29 @@ public class AddDeviceFragment extends Fragment {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
                     bluetoothManager.scanForDevice();
+
+                    // check if the scan is done every checkDelay ms
+                    Handler scanHandler = new Handler();
+                    int checkDelay = 100; // 100ms
+                    scanHandler.postDelayed(new Runnable() {
+                        public void run() {
+//                            System.out.println("myHandler: here!"); // Do your work here
+                            if (!(bluetoothManager.checkTimeout() || bluetoothManager.checkConnected())) {
+                                scanHandler.postDelayed(this, checkDelay);
+//                                Log.i("MINE", ".");
+                            } else if (bluetoothManager.checkConnected()) {
+                                tvDevice.setText(bluetoothManager.readName());
+                                btnContinue.setEnabled(true);
+                            }
+                        }
+                    }, checkDelay);
+
+
                 }
             }
         });
 
         // TODO: display scan results?
-        // TODO: link the scan to a btn so that the user can re-scan
         // TODO: toggle buttons
     }
 

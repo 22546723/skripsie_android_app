@@ -47,7 +47,8 @@ public class BluetoothManager extends AppCompatActivity {
     private static final int[] permissionStatus = {0, 0, 0};
 
 
-    private boolean isConnected = false;
+    private boolean isConnected;
+    private boolean isTimeout;
 
 
     private final String SERVICE_UUID_SCAN = "e1f6fa49-170d-4629-bd77-ea170a0309dc";
@@ -75,6 +76,8 @@ public class BluetoothManager extends AppCompatActivity {
         //init
         this.context = c;
         this.activity = a;
+        this.isConnected = false;
+        this.isTimeout = false;
 
         // Check permissions
         for (int i = 0; i < permissionNames.length; i++) {
@@ -138,13 +141,18 @@ public class BluetoothManager extends AppCompatActivity {
                         return;
                     }
                     bluetoothLeScanner.stopScan(leScanCallback);
-                    if (!isConnected)
-                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
+                    if (!checkConnected()) {
+                        isTimeout = true;
+                    }
+//                    if (!checkConnected())
+//                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
                 }
             }, SCAN_PERIOD);
 
             // start the bt scan
             scanning = true;
+            isTimeout = false;
+            isConnected = false;
             bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, leScanCallback);
         } else {
             //stop bt scan
@@ -161,6 +169,15 @@ public class BluetoothManager extends AppCompatActivity {
      */
     public boolean checkConnected() {
         return isConnected;
+    }
+
+    /**
+     * Get bt timeout status
+     *
+     * @return Bt timeout status (true if timeout, false if not)
+     */
+    public boolean checkTimeout() {
+        return isTimeout;
     }
 
 
@@ -264,6 +281,7 @@ public class BluetoothManager extends AppCompatActivity {
             // connect to the esp32
             device = result.getDevice();
             bluetoothGatt = device.connectGatt(context, false, gattCallback);
+
         }
     };
 
@@ -280,15 +298,16 @@ public class BluetoothManager extends AppCompatActivity {
             Log.i("MINE", String.valueOf(newState));
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
-                Log.i("MINE", "at gatt callback - connected");
                 isConnected = true;
-                Toast.makeText(context, "Connected to Plant Helper", Toast.LENGTH_SHORT).show();
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            }
+            else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
                 isConnected = false;
-                Toast.makeText(context, "Plant Helper disconnected", Toast.LENGTH_SHORT).show();
             }
         }
     };
+
+
+
 
 }
