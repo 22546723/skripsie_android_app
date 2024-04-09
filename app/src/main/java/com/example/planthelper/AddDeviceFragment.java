@@ -54,21 +54,24 @@ public class AddDeviceFragment extends Fragment {
             }
         });
 
+        // Start the bt scan
         Context c = getContext();
-        if (c == null)
-            Log.i("MINE", "empty context in frag");
-
         Activity a = getActivity();
+
         if (a == null)
             Log.i("MINE", "empty activity in frag");
+        if (c == null)
+            Log.i("MINE", "empty context in frag");
+        // TODO: remove this ^
 
-        // setup bt
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             bluetoothManager = new BluetoothManager(c, a);
             bluetoothManager.scanForDevice();
         }
 
-
+        // TODO: display scan results?
+        // TODO: link the scan to a btn so that the user can re-scan
+        // TODO: toggle buttons
     }
 
     @Override
