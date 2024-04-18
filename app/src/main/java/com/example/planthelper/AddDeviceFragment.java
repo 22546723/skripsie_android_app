@@ -57,6 +57,7 @@ public class AddDeviceFragment extends Fragment {
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i("MINE", "pre nav");
                 NavController navController = Navigation.findNavController(v);
                 navController.navigate(R.id.action_addDeviceFragment_to_addWifiFragment);
             }
@@ -77,7 +78,9 @@ public class AddDeviceFragment extends Fragment {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
+                    Log.i("MINE", "pre scan");
                     bluetoothManager.scanForDevice();
+                    Log.i("MINE", "post scan");
                     btnScan.setEnabled(false);
 
                     // check if the scan is done every checkDelay ms
@@ -92,9 +95,10 @@ public class AddDeviceFragment extends Fragment {
                             } else {
                                 btnScan.setEnabled(true);
                                 if (bluetoothManager.checkConnected()) {
-                                    bluetoothManager.setupChars();
+//                                    bluetoothManager.setupChars();
                                     tvDevice.setText(bluetoothManager.readName());
                                     btnContinue.setEnabled(true);
+                                    Log.i("MINE", "meep");
                                 }
                             }
                         }
@@ -102,6 +106,8 @@ public class AddDeviceFragment extends Fragment {
                 }
             }
         });
+
+        Log.i("MINE", "great snakes batman!");
 
         // TODO: display scan results?
         // TODO: toggle buttons
