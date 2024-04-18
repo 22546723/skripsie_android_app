@@ -25,7 +25,7 @@ public class AddDeviceFragment extends Fragment {
     private Button btnContinue;
     private Button btnScan;
     private TextView tvDevice;
-    private BluetoothManager bluetoothManager;
+    private static BluetoothManager bluetoothManager;
 
 
     @Override
@@ -36,7 +36,7 @@ public class AddDeviceFragment extends Fragment {
 
         binding = FragmentAddDeviceBinding.inflate(inflater, container, false);
 
-        requireActivity().setTitle("Add new device");
+        requireActivity().setTitle("Connect to device");
 
         return binding.getRoot();
 
@@ -78,6 +78,7 @@ public class AddDeviceFragment extends Fragment {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
                     bluetoothManager.scanForDevice();
+                    btnScan.setEnabled(false);
 
                     // check if the scan is done every checkDelay ms
                     Handler scanHandler = new Handler();
@@ -88,14 +89,16 @@ public class AddDeviceFragment extends Fragment {
                             if (!(bluetoothManager.checkTimeout() || bluetoothManager.checkConnected())) {
                                 scanHandler.postDelayed(this, checkDelay);
 //                                Log.i("MINE", ".");
-                            } else if (bluetoothManager.checkConnected()) {
-                                tvDevice.setText(bluetoothManager.readName());
-                                btnContinue.setEnabled(true);
+                            } else {
+                                btnScan.setEnabled(true);
+                                if (bluetoothManager.checkConnected()) {
+                                    bluetoothManager.setupChars();
+                                    tvDevice.setText(bluetoothManager.readName());
+                                    btnContinue.setEnabled(true);
+                                }
                             }
                         }
                     }, checkDelay);
-
-
                 }
             }
         });
@@ -107,8 +110,12 @@ public class AddDeviceFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
         binding = null;
     }
 
+    public static BluetoothManager getBluetoothManager() {
+        return bluetoothManager;
+    }
 
 }

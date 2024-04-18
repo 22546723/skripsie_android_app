@@ -1,5 +1,8 @@
 package com.example.planthelper;
 
+import android.app.Activity;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.planthelper.databinding.FragmentAddWifiBinding;
 
+import java.util.List;
+
 public class AddWifiFragment extends Fragment {
     private FragmentAddWifiBinding binding;
     private Button btnContinue;
     private RecyclerView rvWifi;
     private EditText edtPassword;
+    private BluetoothManager bluetoothManager;
 
     @Override
     public View onCreateView(
@@ -41,6 +47,19 @@ public class AddWifiFragment extends Fragment {
         rvWifi = binding.rvWifi;
         edtPassword = binding.edtPassword;
 
+
+
+        // get the bt manager used by the add device fragment
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            bluetoothManager = AddDeviceFragment.getBluetoothManager();
+            Context c = getContext();
+            Activity a = getActivity();
+            bluetoothManager.setActCont(a, c);
+            List<String> networks = bluetoothManager.readNetworks();
+            rvWifi.setAdapter(new wifiAdapter(networks));
+        }
+
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,6 +74,9 @@ public class AddWifiFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            bluetoothManager.disconnect();
+        }
         binding = null;
     }
 }
