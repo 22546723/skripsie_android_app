@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,6 +32,7 @@ public class AddWifiFragment extends Fragment {
     private EditText edtPassword;
     private BluetoothManager bluetoothManager;
     private wifiAdapter adapter;
+    private ProgressBar spinner;
 
     @Override
     public View onCreateView(
@@ -51,6 +53,7 @@ public class AddWifiFragment extends Fragment {
         btnContinue = binding.btnWifiContinue;
         rvWifi = binding.rvWifi;
         edtPassword = binding.edtPassword;
+        spinner = binding.progressBar;
 
 
 
@@ -63,6 +66,7 @@ public class AddWifiFragment extends Fragment {
             bluetoothManager.setActCont(a, c);
             btnContinue.setEnabled(false);
             btnContinue.setText("Scanning");
+            spinner.setVisibility(View.VISIBLE);
 
             // delay by 100ms
             // if bluetoothManager.readNetworks() runs without the delay, the fragment layout only
@@ -75,8 +79,10 @@ public class AddWifiFragment extends Fragment {
                     adapter = new wifiAdapter(networks);
                     rvWifi.setAdapter(adapter);
                     rvWifi.setLayoutManager(new LinearLayoutManager(c));
+                    spinner.setVisibility(View.GONE);
                     btnContinue.setEnabled(true);
                     btnContinue.setText("Continue");
+
                 }
             }, 100);
 

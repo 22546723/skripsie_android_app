@@ -1,66 +1,86 @@
 package com.example.planthelper;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.planthelper.databinding.WifiCardBinding;
-
 import java.util.List;
 
+/**
+ * RecyclerView adapter for AddWifiFragment
+ */
 public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
 
-    private WifiCardBinding binding;
-    private List<String> networks;
+    private final List<String> networks;
     private int selected = -1;
     private int prevSelected = -1;
-    private Context context;
 
 
+    /**
+     * View holder linked to wifi_card.xml
+     */
     public static class viewHolder extends RecyclerView.ViewHolder {
-        private TextView tvName;
-        private CardView cvWifi;
+        private final TextView tvName;
+        private final CardView cvWifi;
 
+
+        /**
+         * Initialise a view holder linked to wifi_card.xml
+         *
+         * @param itemView View to use.
+         * @param binding WifiCardBinding of the viewHolder.
+         */
         public viewHolder(@NonNull View itemView, WifiCardBinding binding) {
             super(itemView);
             tvName = binding.tvWifiCard;
             cvWifi = binding.cvWifiCard;
         }
 
+
+        /**
+         * Returns the name of the text view in the card
+         */
         public TextView getTvName() {
             return tvName;
         }
 
+
+        /**
+         * Returns the name of the card view
+         */
         public CardView getCvWifi() {
             return cvWifi;
         }
 
-        public void setBackground(boolean flag, Context c) {
-            if (flag) {
-                cvWifi.setCardBackgroundColor(c.getResources().getColor(R.color.background, null));
-            }
-            else {
-                cvWifi.setCardBackgroundColor(c.getResources().getColor(R.color.white, null));
-            }
-        }
     }
 
+
+    /**
+     * Initialise the RecyclerView adapter for AddWifiFragment
+     *
+     * @param n List<String> of detected network names
+     */
     public wifiAdapter(List<String> n) {
         networks = n;
+    }
+
+    /**
+     * Returns the SSID of the selected network
+     */
+    public String getSelectedSSID() {
+        return networks.get(selected);
     }
 
     @NonNull
     @Override
     public viewHolder onCreateViewHolder(@NonNull ViewGroup container, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
-        binding = WifiCardBinding.inflate(inflater, container, false);
+        com.example.planthelper.databinding.WifiCardBinding binding = WifiCardBinding.inflate(inflater, container, false);
 
         return new viewHolder(binding.getRoot(), binding);
     }
@@ -68,31 +88,26 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
         holder.getTvName().setText(networks.get(position));
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("MINE", "clicked at "+holder.getAdapterPosition());
+                // update selected network
                 prevSelected = selected;
                 selected = holder.getAdapterPosition();
+
+                // call onBindViewHolder to update the cards
                 notifyItemChanged(selected);
                 notifyItemChanged(prevSelected);
             }
         });
 
+        // set card appearance to indicate selection
         holder.getCvWifi().setSelected(selected == holder.getAdapterPosition());
-
     }
 
     @Override
     public int getItemCount() {
         return networks.size();
-    }
-
-    public int getSelected() {
-        return selected;
-    }
-
-    public String getSelectedSSID() {
-        return networks.get(selected);
     }
 }

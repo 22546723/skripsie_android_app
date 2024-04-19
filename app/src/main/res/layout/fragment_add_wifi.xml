@@ -80,6 +80,7 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/spinner"
         app:layout_constraintBottom_toBottomOf="@+id/rvWifi"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
