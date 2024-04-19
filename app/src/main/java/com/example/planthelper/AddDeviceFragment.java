@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ public class AddDeviceFragment extends Fragment {
     private Button btnContinue;
     private Button btnScan;
     private TextView tvDevice;
+    private ProgressBar spinner;
     private static BluetoothManager bluetoothManager;
 
 
@@ -48,6 +50,9 @@ public class AddDeviceFragment extends Fragment {
         btnContinue = binding.btnAddContinue;
         btnScan = binding.btnAddScan;
         tvDevice = binding.tvDetectedDevice;
+        spinner = binding.progressBar2;
+
+        spinner.setVisibility(View.GONE);
 
         tvDevice.setText("No device connected.");
 
@@ -59,7 +64,7 @@ public class AddDeviceFragment extends Fragment {
             public void onClick(View v) {
                 Log.i("MINE", "pre nav");
                 NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.action_addDeviceFragment_to_addWifiFragment);
+                navController.navigate(R.id.action_addDeviceFragment_to_settingsFragment);
             }
         });
 
@@ -76,12 +81,13 @@ public class AddDeviceFragment extends Fragment {
                     Log.i("MINE", "empty context in frag");
                 // TODO: remove this ^
 
+                spinner.setVisibility(View.VISIBLE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
-                    bluetoothManager.disconnect();
-                    Log.i("MINE", "pre scan");
+//                    bluetoothManager.disconnect();
+//                    Log.i("MINE", "pre scan");
                     bluetoothManager.scanForDevice();
-                    Log.i("MINE", "post scan");
+//                    Log.i("MINE", "post scan");
                     btnScan.setEnabled(false);
 
                     // check if the scan is done every checkDelay ms
@@ -98,8 +104,9 @@ public class AddDeviceFragment extends Fragment {
                                 if (bluetoothManager.checkConnected()) {
 //                                    bluetoothManager.setupChars();
                                     tvDevice.setText(bluetoothManager.readName());
+                                    spinner.setVisibility(View.GONE);
                                     btnContinue.setEnabled(true);
-                                    Log.i("MINE", "meep");
+//                                    Log.i("MINE", "meep");
                                 }
                             }
                         }

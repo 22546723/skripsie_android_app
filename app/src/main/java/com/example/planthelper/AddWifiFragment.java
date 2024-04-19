@@ -28,6 +28,7 @@ import java.util.List;
 public class AddWifiFragment extends Fragment {
     private FragmentAddWifiBinding binding;
     private Button btnContinue;
+    private Button btnCancel;
     private RecyclerView rvWifi;
     private EditText edtPassword;
     private BluetoothManager bluetoothManager;
@@ -54,6 +55,7 @@ public class AddWifiFragment extends Fragment {
         rvWifi = binding.rvWifi;
         edtPassword = binding.edtPassword;
         spinner = binding.progressBar;
+        btnCancel = binding.btnCancelWifi;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // get the bt manager from add device fragment
@@ -67,6 +69,7 @@ public class AddWifiFragment extends Fragment {
             // block user while scanning for networks
             btnContinue.setEnabled(false);
             btnContinue.setText("Scanning");
+            btnCancel.setVisibility(View.GONE);
             spinner.setVisibility(View.VISIBLE);
 
             // delay by 100ms
@@ -87,6 +90,7 @@ public class AddWifiFragment extends Fragment {
                     spinner.setVisibility(View.GONE);
                     btnContinue.setEnabled(true);
                     btnContinue.setText("Continue");
+                    btnCancel.setVisibility(View.VISIBLE);
                 }
             }, 100);
 
@@ -99,10 +103,12 @@ public class AddWifiFragment extends Fragment {
                 String ssid = adapter.getSelectedSSID();
                 boolean connected = false;
 
+                spinner.setVisibility(View.VISIBLE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     connected = bluetoothManager.connectWifi(ssid, password);
                 }
 
+                spinner.setVisibility(View.GONE);
                 if (connected) {
                     Toast.makeText(getContext(), "WiFi connected", Toast.LENGTH_SHORT).show();
                     NavController navController = Navigation.findNavController(v);
@@ -111,6 +117,14 @@ public class AddWifiFragment extends Fragment {
                 else {
                     Toast.makeText(getContext(), "WiFi connection unsuccessful", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavController navController = Navigation.findNavController(v);
+                navController.navigate(R.id.action_addWifiFragment_to_settingsFragment);
             }
         });
     }

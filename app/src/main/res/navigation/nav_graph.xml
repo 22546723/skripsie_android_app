@@ -29,17 +29,14 @@
             android:id="@+id/action_settingsFragment_to_addWifiFragment"
             app:destination="@id/addWifiFragment" />
     </fragment>
-    <action
-        android:id="@+id/action_global_settingsFragment"
-        app:destination="@id/settingsFragment" />
     <fragment
         android:id="@+id/addDeviceFragment"
         android:name="com.example.planthelper.AddDeviceFragment"
         android:label="fragment_add_device"
         tools:layout="@layout/fragment_add_device" >
         <action
-            android:id="@+id/action_addDeviceFragment_to_addWifiFragment"
-            app:destination="@id/addWifiFragment" />
+            android:id="@+id/action_addDeviceFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/addWifiFragment"
@@ -50,4 +47,7 @@
             android:id="@+id/action_addWifiFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
     </fragment>
+    <action
+        android:id="@+id/action_global_addDeviceFragment"
+        app:destination="@id/addDeviceFragment" />
 </navigation>

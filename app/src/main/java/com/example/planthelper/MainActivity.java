@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_settings) {
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-            navController.navigate(R.id.action_global_settingsFragment);
+            navController.navigate(R.id.action_global_addDeviceFragment);
             return true;
         }
 
