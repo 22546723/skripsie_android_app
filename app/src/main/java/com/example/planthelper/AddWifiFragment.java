@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.planthelper.databinding.FragmentAddWifiBinding;
@@ -59,6 +60,7 @@ public class AddWifiFragment extends Fragment {
             bluetoothManager.setActCont(a, c);
             List<String> networks = bluetoothManager.readNetworks();
             rvWifi.setAdapter(new wifiAdapter(networks));
+            rvWifi.setLayoutManager(new LinearLayoutManager(c));
         }
 
         btnContinue.setOnClickListener(new View.OnClickListener() {

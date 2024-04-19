@@ -240,7 +240,7 @@ public class BluetoothManager extends AppCompatActivity {
     public List<String> readNetworks() {
         List<String> networks = new ArrayList<>();
 
-        networks.add("Add names like this");
+//        networks.add("Add names like this");
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
@@ -267,9 +267,10 @@ public class BluetoothManager extends AppCompatActivity {
                     networks.add(name);
                     writeCharacteristic(scanNew, "0");
 //                    bluetoothGatt.writeCharacteristic(scanNew, "0".getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-                    if (readCharacteristic(scanStatus).equals("0")) {
-                        done = true;
-                    }
+
+                }
+                if (readCharacteristic(scanStatus).equals("0")) {
+                    done = true;
                 }
 
             }
