@@ -78,6 +78,7 @@ public class AddDeviceFragment extends Fragment {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
+                    bluetoothManager.disconnect();
                     Log.i("MINE", "pre scan");
                     bluetoothManager.scanForDevice();
                     Log.i("MINE", "post scan");

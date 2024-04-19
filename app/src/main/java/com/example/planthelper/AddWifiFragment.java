@@ -55,15 +55,16 @@ public class AddWifiFragment extends Fragment {
         edtPassword = binding.edtPassword;
         spinner = binding.progressBar;
 
-
-
-        // get the bt manager used by the add device fragment
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // get the bt manager from add device fragment
             bluetoothManager = AddDeviceFragment.getBluetoothManager();
+
+            // update bluetooth manager activity and context
             Context c = getContext();
             Activity a = getActivity();
             bluetoothManager.setActCont(a, c);
+
+            // block user while scanning for networks
             btnContinue.setEnabled(false);
             btnContinue.setText("Scanning");
             spinner.setVisibility(View.VISIBLE);
@@ -76,13 +77,16 @@ public class AddWifiFragment extends Fragment {
                 @Override
                 public void run() {
                     List<String> networks = bluetoothManager.readNetworks();
+
+                    // setup RecyclerView
                     adapter = new wifiAdapter(networks);
                     rvWifi.setAdapter(adapter);
                     rvWifi.setLayoutManager(new LinearLayoutManager(c));
+
+                    // allow user to continue
                     spinner.setVisibility(View.GONE);
                     btnContinue.setEnabled(true);
                     btnContinue.setText("Continue");
-
                 }
             }, 100);
 
@@ -91,7 +95,6 @@ public class AddWifiFragment extends Fragment {
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Todo: add wifi verification
                 String password = String.valueOf(edtPassword.getText());
                 String ssid = adapter.getSelectedSSID();
                 boolean connected = false;
@@ -108,11 +111,8 @@ public class AddWifiFragment extends Fragment {
                 else {
                     Toast.makeText(getContext(), "WiFi connection unsuccessful", Toast.LENGTH_SHORT).show();
                 }
-
-
             }
         });
-
     }
 
     @Override

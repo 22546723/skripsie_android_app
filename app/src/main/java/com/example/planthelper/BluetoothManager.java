@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
@@ -64,7 +65,9 @@ public class BluetoothManager extends AppCompatActivity {
 
     private final String SERVICE_UUID_WIFI_SELECT = "c3313912-4f44-4c5d-abe4-6a99dbe5274f";
     private final String CHARACTERISTIC_UUID_WIFI_NAME = "62a140cc-0bcf-49da-94e3-fba705938272";
+    private final String CHARACTERISTIC_UUID_WIFI_NAME_2 = "2b8787a9-0908-48e5-90ed-18208cf9c197";
     private final String CHARACTERISTIC_UUID_WIFI_PASSWORD = "1603d3a3-7500-4e90-8310-6e7b12e7bfa4";
+    private final String CHARACTERISTIC_UUID_WIFI_PASSWORD_2 = "55799be4-bdcf-4b97-ac6f-783dc4de4757";
     private final String CHARACTERISTIC_UUID_WIFI_SET = "1675752a-2a8e-48e8-99ef-ee90ff878d0f";
     private final String CHARACTERISTIC_UUID_WIFI_CONNECTED = "792920e9-f1ff-4587-879a-8cefb09c18d2";
 
@@ -78,7 +81,9 @@ public class BluetoothManager extends AppCompatActivity {
 
     private BluetoothGattService wifiService;
     private BluetoothGattCharacteristic wifiName;
+    private BluetoothGattCharacteristic wifiName2;
     private BluetoothGattCharacteristic wifiPassword;
+    private BluetoothGattCharacteristic wifiPassword2;
     private BluetoothGattCharacteristic wifiSet;
     private BluetoothGattCharacteristic wifiConnected;
 
@@ -159,9 +164,9 @@ public class BluetoothManager extends AppCompatActivity {
      * @see #leScanCallback
      */
     public void scanForDevice() {
-        Log.i("MINE", "1");
+//        Log.i("MINE", "1");
         if (!scanning) {
-            Log.i("MINE", "2");
+//            Log.i("MINE", "2");
             long SCAN_PERIOD = 10000; // 10 sec
 
             // add a runnable to the handler that checks bt permission and stops the BT scan after SCAN_PERIOD milliseconds
@@ -177,7 +182,7 @@ public class BluetoothManager extends AppCompatActivity {
                     if (!checkConnected()) {
                         isTimeout = true;
                     }
-                    Log.i("MINE", "3");
+//                    Log.i("MINE", "3");
 //                    if (!checkConnected())
 //                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
                 }
@@ -192,12 +197,12 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, leScanCallback);
 //            bluetoothLeScanner.startScan(null, scanSettings, leScanCallback);
 //            bluetoothLeScanner.startScan(leScanCallback);
-            Log.i("MINE", "4");
+//            Log.i("MINE", "4");
         } else {
             //stop bt scan
             scanning = false;
             bluetoothLeScanner.stopScan(leScanCallback);
-            Log.i("MINE", "5");
+//            Log.i("MINE", "5");
         }
     }
 
@@ -378,6 +383,55 @@ public class BluetoothManager extends AppCompatActivity {
     public boolean connectWifi(String ssid, String password) {
         boolean connected = false;
 
+
+
+        String name1 = "";
+        String name2 = "";
+        String password1 = "";
+        String password2 = "";
+
+        if (ssid.length() > 20) {
+            name1 = ssid.substring(0, 20);
+            name2 = ssid.substring(20);
+        }
+        else {
+            name1 = ssid;
+        }
+
+        Log.i("MINE", name1 + " | " + name2);
+
+        if (password.length() > 20) {
+            password1 = password.substring(0, 20);
+            password2 = password.substring(20);
+        }
+        else {
+            password1 = password;
+        }
+
+        Log.i("MINE", password1 + " | " + password2);
+
+        writeCharacteristic(wifiName, name1);
+        writeCharacteristic(wifiName2, name2);
+        writeCharacteristic(wifiPassword, password1);
+        writeCharacteristic(wifiPassword2, password2);
+        writeCharacteristic(wifiSet, "1");
+
+//        handler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        }, 100);
+
+        boolean done = false;
+
+        while (!done) {
+            done = readCharacteristic(wifiSet).equals("0");
+        }
+
+        connected = readCharacteristic(wifiConnected).equals("1");
+        Log.i("MINE", readCharacteristic(wifiConnected));
+
         return connected;
     }
 
@@ -416,7 +470,7 @@ public class BluetoothManager extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-            Log.i("MINE", "6");
+//            Log.i("MINE", "6");
 
             // permission checks and requests
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
@@ -431,9 +485,6 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothLeScanner.stopScan(leScanCallback);
             handler.removeCallbacks(runnable);
 
-            String temp = result.toString();
-            Log.i("MINE", temp);
-            // TODO: remove this ^
 
             // connect to the esp32
             device = result.getDevice();
@@ -459,8 +510,8 @@ public class BluetoothManager extends AppCompatActivity {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.i("MINE", "at gatt callback");
-            Log.i("MINE", String.valueOf(newState));
+//            Log.i("MINE", "at gatt callback");
+//            Log.i("MINE", String.valueOf(newState));
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
 //                setupChars(); // setup service and characteristic variables
@@ -470,7 +521,7 @@ public class BluetoothManager extends AppCompatActivity {
                     return;
                 }
                 bluetoothGatt.discoverServices();
-                Log.i("MINE", "connected");
+//                Log.i("MINE", "connected");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
                 isConnected = false;
@@ -502,26 +553,28 @@ public class BluetoothManager extends AppCompatActivity {
      * Setup service and characteristic variables.
      */
     public void setupChars() {
-        Log.i("MINE", "setup start");
+//        Log.i("MINE", "setup start");
         scanService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_SCAN));
         scanName = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NAME));
         scanNew = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NEW));
         scanStatus = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN));
 
-        Log.i("MINE", "setup 1");
+//        Log.i("MINE", "setup 1");
         wifiService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_WIFI_SELECT));
         wifiName = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME));
+        wifiName2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME_2));
         wifiPassword = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD));
+        wifiPassword2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD_2));
         wifiSet = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_SET));
         wifiConnected = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_CONNECTED));
 
-        Log.i("MINE", "setup 2");
+//        Log.i("MINE", "setup 2");
         connectService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_CONNECT));
         connectName = connectService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_DEVICE));
-        Log.i("MINE", "setup end");
+//        Log.i("MINE", "setup end");
 
         isConnected = true;
-        Log.i("MINE", "con set");
+//        Log.i("MINE", "con set");
     }
 
 
