@@ -21,6 +21,7 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
     private List<String> networks;
     private int selected = -1;
     private int prevSelected = -1;
+    private Context context;
 
 
     public static class viewHolder extends RecyclerView.ViewHolder {
@@ -31,15 +32,6 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
             super(itemView);
             tvName = binding.tvWifiCard;
             cvWifi = binding.cvWifiCard;
-
-//            itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Log.i("MINE", "clicked");
-//                }
-//            });
-
-
         }
 
         public TextView getTvName() {
@@ -50,11 +42,13 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
             return cvWifi;
         }
 
-        public void setBackground(boolean flag) {
-            Log.i("MINE", "f");
-            cvWifi.setSelected(flag);
-            String temp = String.valueOf(cvWifi.isSelected());
-            Log.i("MINE", temp);
+        public void setBackground(boolean flag, Context c) {
+            if (flag) {
+                cvWifi.setCardBackgroundColor(c.getResources().getColor(R.color.background, null));
+            }
+            else {
+                cvWifi.setCardBackgroundColor(c.getResources().getColor(R.color.white, null));
+            }
         }
     }
 
@@ -78,30 +72,16 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
             @Override
             public void onClick(View v) {
                 Log.i("MINE", "clicked at "+holder.getAdapterPosition());
+                prevSelected = selected;
                 selected = holder.getAdapterPosition();
-                holder.setBackground(true);
+                notifyItemChanged(selected);
+                notifyItemChanged(prevSelected);
             }
         });
 
-
-
-//        holder.getCvWifi().setSelected(selected == holder.getAdapterPosition());
-//
-//        if (selected == holder.getAdapterPosition()) {
-////            holder.getCvWifi().setCardBackgroundColor();
-//            holder.getCvWifi().setSelected(true);
-//            Log.i("MINE", "set");
-//        }
-//        else {
-//            holder.getCvWifi().setSelected(false);
-//        }
-
-//        final int index = holder.getAdapterPosition();
+        holder.getCvWifi().setSelected(selected == holder.getAdapterPosition());
 
     }
-
-
-
 
     @Override
     public int getItemCount() {
@@ -110,5 +90,9 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
 
     public int getSelected() {
         return selected;
+    }
+
+    public String getSelectedSSID() {
+        return networks.get(selected);
     }
 }

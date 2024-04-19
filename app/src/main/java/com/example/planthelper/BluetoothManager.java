@@ -93,6 +93,8 @@ public class BluetoothManager extends AppCompatActivity {
     private boolean writeDone;
     private String charVal;
 
+    private Runnable runnable;
+
 
     /**
      * Class that manages all Bluetooth interaction with the ESP32
@@ -160,10 +162,10 @@ public class BluetoothManager extends AppCompatActivity {
         Log.i("MINE", "1");
         if (!scanning) {
             Log.i("MINE", "2");
-            long SCAN_PERIOD = 15000; // 10 sec
+            long SCAN_PERIOD = 10000; // 10 sec
 
             // add a runnable to the handler that checks bt permission and stops the BT scan after SCAN_PERIOD milliseconds
-            handler.postDelayed(new Runnable() {
+            runnable = new Runnable() {
                 @Override
                 public void run() {
                     scanning = false;
@@ -179,7 +181,9 @@ public class BluetoothManager extends AppCompatActivity {
 //                    if (!checkConnected())
 //                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
                 }
-            }, SCAN_PERIOD);
+            };
+
+            handler.postDelayed(runnable, SCAN_PERIOD);
 
             // start the bt scan
             scanning = true;
@@ -311,7 +315,7 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothGatt.writeCharacteristic(characteristic, value.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         }
 
-        Log.i("MINE", "s");
+//        Log.i("MINE", "s");
         while (!writeDone) {
             handler.postDelayed(new Runnable() {
                 @Override
@@ -338,7 +342,7 @@ public class BluetoothManager extends AppCompatActivity {
 
         bluetoothGatt.readCharacteristic(characteristic);
 
-        Log.i("MINE", "s");
+//        Log.i("MINE", "s");
         while (!readDone) {
             handler.postDelayed(new Runnable() {
                 @Override
@@ -354,7 +358,7 @@ public class BluetoothManager extends AppCompatActivity {
                 }
             }, delay);
         }
-        Log.i("MINE", "e");
+//        Log.i("MINE", "e");
         return charVal;
     }
 
@@ -425,6 +429,7 @@ public class BluetoothManager extends AppCompatActivity {
             }
 
             bluetoothLeScanner.stopScan(leScanCallback);
+            handler.removeCallbacks(runnable);
 
             String temp = result.toString();
             Log.i("MINE", temp);

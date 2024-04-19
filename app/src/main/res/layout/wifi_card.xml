@@ -11,7 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_margin="10dp"
-        app:cardBackgroundColor="@color/white"
+        app:cardBackgroundColor="@color/wifi_card_color"
         app:cardCornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
