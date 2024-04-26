@@ -5,4 +5,6 @@
     <color name="highlight">#C462B74E</color>
     <color name="background">#C4B1BEAE</color>
     <color name="red">#D00F0F</color>
+    <color name="soil_graph">#C44F3111</color>
+    <color name="uv_graph">#C41274C0</color>
 </resources>

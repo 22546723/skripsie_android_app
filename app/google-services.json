@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "188996507776",
+    "firebase_url": "https://skripsie-1e23a-default-rtdb.firebaseio.com",
+    "project_id": "skripsie-1e23a",
+    "storage_bucket": "skripsie-1e23a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188996507776:android:0a39c7bc84d52f2ec0ae65",
+        "android_client_info": {
+          "package_name": "com.example.planthelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "188996507776-hdnqvn9q1qdiblrsan34bnsn2il4nshb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTkn5Jd8tciTFZqoX5JvqoxkV3WbWH4HE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "188996507776-hdnqvn9q1qdiblrsan34bnsn2il4nshb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

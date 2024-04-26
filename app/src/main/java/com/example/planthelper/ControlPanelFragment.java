@@ -2,6 +2,7 @@ package com.example.planthelper;
 
 import static android.content.ContentValues.TAG;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.planthelper.databinding.FragmentControlPanelBinding;
@@ -23,8 +25,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.LegendRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class ControlPanelFragment extends Fragment {
 
@@ -32,7 +42,10 @@ public class ControlPanelFragment extends Fragment {
     private GraphView graphView;
     private FirebaseFirestore db;
     private FirebaseDatabase database;
+
     private DatabaseReference myRef;
+
+    private List<DataEntry> fbData = new ArrayList<DataEntry>();;
 
 
     @Override
@@ -49,6 +62,8 @@ public class ControlPanelFragment extends Fragment {
 
         requireActivity().setTitle("Control panel");
 
+
+
         return binding.getRoot();
 
     }
@@ -56,30 +71,12 @@ public class ControlPanelFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
+        db = FirebaseFirestore.getInstance();
 
-//        db = FirebaseFirestore.getInstance();
-//        readFirestoreData();
-//
-//        database = FirebaseDatabase.getInstance();
-//        myRef = database.getReference("test");
-//
-//        myRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                // This method is called once with the initial value and again
-//                // whenever data at this location is updated.
-//                String value = snapshot.getValue(String.class);
-//                Log.d(TAG, "Value is: " + value);
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                // Failed to read value
-//                Log.w(TAG, "Failed to read value.", error.toException());
-//            }
-//        });
 
-        testGraph();
+        readFirestoreData();
+
+//        testGraph();
     }
 
     @Override
@@ -93,6 +90,7 @@ public class ControlPanelFragment extends Fragment {
 
 
     private void readFirestoreData() {
+
         db.collection("data")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -100,34 +98,62 @@ public class ControlPanelFragment extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                                Log.d("FBASE", document.getId() + " => " + document.getData());
+//                                document.get("name");
+//                                Log.d("FBASE", document.getId() + " name => " + document.get("name"));
+                                long soil = (long) document.get("soil");
+                                long uv = (long) document.get("uv");
+                                String timestamp = (String) document.get("timestamp");
+//                                Log.i("FBASE", "rec: "+document.get("name")+" | soil: "+soil+" | uv: "+uv+" | timestamp: "+timestamp);
+
+
+                                try {
+                                    DataEntry dataEntry = new DataEntry(document.getId(), soil, uv, timestamp);
+                                    fbData.add(dataEntry);
+                                } catch (ParseException e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
+
+
+                            // sort the data
+                            // TODO: implement sorting by date and time
+                            fbData.sort(new recNoCompare());
+
+                            // Display the data
+                            setGraph();
                         } else {
-                            Log.w(TAG, "Error getting documents.", task.getException());
+                            Log.w("FBASE", "Error getting documents.", task.getException());
                         }
                     }
                 });
+
+
     }
 
-    private void testGraph() {
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[]{
-                // on below line we are adding
-                // each point on our x and y axis.
-                new DataPoint(0, 1),
-                new DataPoint(1, 3),
-                new DataPoint(2, 4),
-                new DataPoint(3, 9),
-                new DataPoint(4, 6),
-                new DataPoint(5, 3),
-                new DataPoint(6, 6),
-                new DataPoint(7, 1),
-                new DataPoint(8, 2)
-        });
+    private void setGraph() {
+        DataPoint[] soilData = new DataPoint[fbData.size()];
+        DataPoint[] uvData = new DataPoint[fbData.size()];
+        for (int i = 0; i < fbData.size(); i++) { //fbData.size()
+            DataEntry entry = fbData.get(i);
+            soilData[i] = new DataPoint(entry.getRecNo(), entry.getSoilLvl());
+            uvData[i] = new DataPoint(entry.getRecNo(), entry.getUvLvl());
+        }
+
+        LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<DataPoint>(soilData);
+        soilSeries.setTitle("Soil moisture level");
+        soilSeries.setColor(ContextCompat.getColor(requireContext(), R.color.soil_graph));
+
+        LineGraphSeries<DataPoint> uvSeries = new LineGraphSeries<DataPoint>(uvData);
+        uvSeries.setTitle("UV light exposure");
+        uvSeries.setColor(ContextCompat.getColor(requireContext(), R.color.uv_graph));
+
+
 
         // after adding data to our line graph series.
         // on below line we are setting
         // title for our graph view.
-        graphView.setTitle("My Graph View");
+        graphView.setTitle("Today");
 
         // on below line we are setting
         // text color to our graph view.
@@ -139,9 +165,22 @@ public class ControlPanelFragment extends Fragment {
 
         // on below line we are adding
         // data series to our graph view.
-        graphView.addSeries(series);
+        graphView.addSeries(soilSeries);
+
+        graphView.addSeries(uvSeries);
+
+        graphView.getLegendRenderer().setVisible(true);
+        graphView.getLegendRenderer().setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background));
+        graphView.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
     }
 
 
+    // Compare record numbers of DataEntry objects to sort fbData by record number
+    private static class recNoCompare implements Comparator<DataEntry> {
+        @Override
+        public int compare(DataEntry o1, DataEntry o2) {
+            return (int) (o1.getRecNo() - o2.getRecNo());
+        }
+    }
 
 }
