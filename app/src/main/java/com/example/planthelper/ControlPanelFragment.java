@@ -41,9 +41,9 @@ public class ControlPanelFragment extends Fragment {
     private FragmentControlPanelBinding binding;
     private GraphView graphView;
     private FirebaseFirestore db;
-    private FirebaseDatabase database;
+    private FirebaseDatabase rdb;
 
-    private DatabaseReference myRef;
+    private DatabaseReference nameRef;
 
     private List<DataEntry> fbData = new ArrayList<DataEntry>();;
 
@@ -72,6 +72,24 @@ public class ControlPanelFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
         db = FirebaseFirestore.getInstance();
+        rdb = FirebaseDatabase.getInstance();
+        nameRef = rdb.getReference("status/name");
+
+        nameRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // This method is called once with the initial value and again
+                // whenever data at this location is updated.
+                String value = snapshot.getValue(String.class);
+                Log.d("FBASE", "Value is: " + value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Failed to read value
+                Log.w("FBASE", "Failed to read value.", error.toException());
+            }
+        });
 
 
         readFirestoreData();
@@ -86,6 +104,10 @@ public class ControlPanelFragment extends Fragment {
         requireActivity().invalidateOptionsMenu();
 
         binding = null;
+    }
+
+    private void readRealtimeData() {
+
     }
 
 
