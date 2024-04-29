@@ -145,7 +145,7 @@
                 android:text="Set target soil moisture level:" />
 
             <SeekBar
-                android:id="@+id/seekBar"
+                android:id="@+id/sbTarget"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tvTargetLabel"
@@ -154,7 +154,8 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp" />
+                android:layout_marginBottom="10dp"
+                android:max="100" />
 
             <TextView
                 android:id="@+id/tvSoilTarget"
@@ -166,7 +167,7 @@
                 android:layout_centerInParent="true"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_toEndOf="@+id/seekBar"
+                android:layout_toEndOf="@+id/sbTarget"
                 android:text="80%"
                 android:textAlignment="center"
                 android:textSize="34sp" />

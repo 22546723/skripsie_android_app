@@ -8,6 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -26,6 +28,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LegendRenderer;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -33,6 +36,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,8 +48,17 @@ public class ControlPanelFragment extends Fragment {
     private FirebaseDatabase rdb;
 
     private DatabaseReference nameRef;
+    private DatabaseReference targetRef;
+    private DatabaseReference updateRef;
+    private DatabaseReference soilRef;
+    private DatabaseReference uvRef;
 
     private List<DataEntry> fbData = new ArrayList<DataEntry>();;
+
+    private SeekBar sbTarget;
+    private TextView tvTarget;
+    private TextView tvSoilLive;
+    private TextView tvUvLive;
 
 
     @Override
@@ -71,9 +84,18 @@ public class ControlPanelFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
+        sbTarget = binding.sbTarget;
+        tvTarget = binding.tvSoilTarget;
+        tvSoilLive = binding.tvSoilLive;
+        tvUvLive = binding.tvLightLive;
+
         db = FirebaseFirestore.getInstance();
         rdb = FirebaseDatabase.getInstance();
         nameRef = rdb.getReference("status/name");
+        targetRef = rdb.getReference("status/soil_target");
+        updateRef = rdb.getReference("status/update");
+        soilRef = rdb.getReference("data/soil_moisture");
+        uvRef = rdb.getReference("data/uv_lvl");
 
         nameRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -91,10 +113,69 @@ public class ControlPanelFragment extends Fragment {
             }
         });
 
+        // Update display and write selected value to realtime database
+        sbTarget.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                String disp = String.valueOf(progress) + '%';
+                tvTarget.setText(disp);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int val = seekBar.getProgress();
+                targetRef.setValue(val);
+                updateRef.setValue(true);
+            }
+        });
+
+        soilRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String value = String.valueOf(snapshot.getValue(Long.class)) + '%';
+                tvSoilLive.setText(value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        uvRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String value = String.valueOf(snapshot.getValue(Long.class)) + '%';
+                tvUvLive.setText(value);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        targetRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                long value = snapshot.getValue(Long.class);
+                sbTarget.setProgress((int) value);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
         readFirestoreData();
-
-//        testGraph();
     }
 
     @Override
@@ -104,10 +185,6 @@ public class ControlPanelFragment extends Fragment {
         requireActivity().invalidateOptionsMenu();
 
         binding = null;
-    }
-
-    private void readRealtimeData() {
-
     }
 
 
@@ -158,8 +235,10 @@ public class ControlPanelFragment extends Fragment {
         DataPoint[] uvData = new DataPoint[fbData.size()];
         for (int i = 0; i < fbData.size(); i++) { //fbData.size()
             DataEntry entry = fbData.get(i);
-            soilData[i] = new DataPoint(entry.getRecNo(), entry.getSoilLvl());
-            uvData[i] = new DataPoint(entry.getRecNo(), entry.getUvLvl());
+            soilData[i] = new DataPoint(entry.getDate(), entry.getSoilLvl());
+            uvData[i] = new DataPoint(entry.getDate(), entry.getUvLvl());
+//            soilData[i] = new DataPoint(entry.getRecNo(), entry.getSoilLvl());
+//            uvData[i] = new DataPoint(entry.getRecNo(), entry.getUvLvl());
         }
 
         LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<DataPoint>(soilData);
@@ -194,6 +273,10 @@ public class ControlPanelFragment extends Fragment {
         graphView.getLegendRenderer().setVisible(true);
         graphView.getLegendRenderer().setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background));
         graphView.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
+
+        graphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity()));
+        graphView.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
+//        graphView.getGridLabelRenderer().setHumanRounding(false);
     }
 
 
@@ -202,6 +285,15 @@ public class ControlPanelFragment extends Fragment {
         @Override
         public int compare(DataEntry o1, DataEntry o2) {
             return (int) (o1.getRecNo() - o2.getRecNo());
+        }
+    }
+
+    private static class dateCompare implements Comparator<DataEntry> {
+        @Override
+        public int compare(DataEntry o1, DataEntry o2) {
+            Date d1 = o1.getDate();
+            Date d2 = o2.getDate();
+            return (d1.compareTo(d2));
         }
     }
 
