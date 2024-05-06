@@ -62,7 +62,8 @@ public class AddDeviceFragment extends Fragment {
         btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("MINE", "pre nav");
+//                Log.i("MINE", "pre nav");
+                SettingsFragment.setBluetoothManager(bluetoothManager);
                 NavController navController = Navigation.findNavController(v);
                 navController.navigate(R.id.action_addDeviceFragment_to_settingsFragment);
             }

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -12,6 +13,8 @@ public class DataEntry {
     private long soilLvl;
     private long uvLvl;
     private Date date;
+    private Calendar calendar;
+
 
     /**
      * Object representing an entry in the firestore database
@@ -28,8 +31,11 @@ public class DataEntry {
         this.soilLvl = soil;
         this.uvLvl = uv;
 
-        long temp2 = Long.parseLong(timestamp);
+        long temp2 = Long.parseLong(timestamp) * 1000;
         this.date = new Date(temp2);
+        this.calendar = Calendar.getInstance();
+        this.calendar.setTime(date);
+        int tempM = calendar.get(Calendar.MONTH);
 //        this.date = new Date(timestamp);
 //
 //        DateFormat df = DateFormat.getDateInstance();
@@ -51,5 +57,9 @@ public class DataEntry {
 
     public Date getDate() {
         return date;
+    }
+
+    public Calendar getCalendar() {
+        return calendar;
     }
 }

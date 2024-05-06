@@ -24,6 +24,7 @@ public class SettingsFragment extends Fragment {
     private ImageButton ibtnName, ibtnWifi;
     private EditText edtName;
     private TextView tvWifi;
+    private static BluetoothManager bluetoothManager;
 
 
 
@@ -84,5 +85,13 @@ public class SettingsFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    public static void setBluetoothManager(BluetoothManager manager) {
+        bluetoothManager = manager;
+    }
+
+    public static BluetoothManager getBluetoothManager() {
+        return bluetoothManager;
     }
 }

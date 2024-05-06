@@ -59,7 +59,8 @@ public class AddWifiFragment extends Fragment {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // get the bt manager from add device fragment
-            bluetoothManager = AddDeviceFragment.getBluetoothManager();
+//            bluetoothManager = AddDeviceFragment.getBluetoothManager();
+            bluetoothManager = SettingsFragment.getBluetoothManager();
 
             // update bluetooth manager activity and context
             Context c = getContext();
@@ -133,7 +134,7 @@ public class AddWifiFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            bluetoothManager.disconnect();
+//            bluetoothManager.disconnect();
         }
         binding = null;
     }
