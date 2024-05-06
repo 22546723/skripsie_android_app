@@ -1,14 +1,14 @@
 package com.example.planthelper;
 
-import static android.content.ContentValues.TAG;
-
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import com.example.planthelper.databinding.FragmentControlPanelBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,40 +30,34 @@ import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LabelFormatter;
 import com.jjoe64.graphview.LegendRenderer;
-import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
-import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class ControlPanelFragment extends Fragment {
 
     private FragmentControlPanelBinding binding;
     private GraphView graphView;
     private FirebaseFirestore db;
-    private FirebaseDatabase rdb;
 
     private DatabaseReference nameRef;
     private DatabaseReference targetRef;
     private DatabaseReference updateRef;
-    private DatabaseReference soilRef;
-    private DatabaseReference uvRef;
 
-    private List<DataEntry> fbData = new ArrayList<DataEntry>();
-    private List<List<DataEntry>> monthData = new ArrayList<>(12);
+    private final List<DataEntry> fbData = new ArrayList<DataEntry>();
 
     private SeekBar sbTarget;
     private TextView tvTarget;
     private TextView tvSoilLive;
     private TextView tvUvLive;
+    private Spinner spnTimeframe;
+
 
 
     @Override
@@ -92,15 +85,49 @@ public class ControlPanelFragment extends Fragment {
         tvTarget = binding.tvSoilTarget;
         tvSoilLive = binding.tvSoilLive;
         tvUvLive = binding.tvLightLive;
+        spnTimeframe = binding.spnTimeframe;
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
+                R.array.timeframe_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnTimeframe.setAdapter(adapter);
+
+        spnTimeframe.setEnabled(false);
+        spnTimeframe.setSelection(0);
+
+        spnTimeframe.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: dispDay();
+                        break;
+
+                    case 1: dispWeek();
+                        break;
+
+                    case 2: dispMonth();
+                        break;
+
+                    case 3: dispYear();
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
 
         // Firebase setup
         db = FirebaseFirestore.getInstance();
-        rdb = FirebaseDatabase.getInstance();
+        FirebaseDatabase rdb = FirebaseDatabase.getInstance();
         nameRef = rdb.getReference("status/name");
         targetRef = rdb.getReference("status/soil_target");
         updateRef = rdb.getReference("status/update");
-        soilRef = rdb.getReference("data/soil_moisture");
-        uvRef = rdb.getReference("data/uv_lvl");
+        DatabaseReference soilRef = rdb.getReference("data/soil_moisture");
+        DatabaseReference uvRef = rdb.getReference("data/uv_lvl");
 
         // Add value event listeners to update the name, soil target and sensor readings
         nameRef.addValueEventListener(new ValueEventListener() {
@@ -178,7 +205,6 @@ public class ControlPanelFragment extends Fragment {
             }
         });
 
-
         readFirestoreData();
     }
 
@@ -198,6 +224,8 @@ public class ControlPanelFragment extends Fragment {
      * @see DataEntry
      */
     private void readFirestoreData() {
+        spnTimeframe.setEnabled(false);
+
         db.collection("data")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -220,16 +248,10 @@ public class ControlPanelFragment extends Fragment {
                             }
 
                             // sort the data
-                            // TODO: implement sorting by date and time?
                             fbData.sort(new recNoCompare());
-
-
-                            // TODO: add a drop down to the graph card that lets you select the time interval
-                            // TODO: replace this call with a done flag to enable the drop down
-//                            dispYear();
-//                            dispMonth();
-//                            dispWeek();
                             dispDay();
+
+                            spnTimeframe.setEnabled(true);
                         } else {
                             Log.w("FBASE", "Error getting documents.", task.getException());
                         }
@@ -244,8 +266,6 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispDay() {
         Calendar calendar = Calendar.getInstance();
-//        int month = Calendar.MARCH; // calendar.get(Calendar.MONTH);
-//        int week = 2; // calendar.get(Calendar.WEEK_OF_MONTH);
         int day = 64; // calendar.get(Calendar.DAY_OF_YEAR);
 
         DataPoint[] soilData = new DataPoint[24];
@@ -256,8 +276,6 @@ public class ControlPanelFragment extends Fragment {
             long avgUv = 0;
             long numEntries = 0;
             for (DataEntry entry : fbData) {
-//                int entMonth = entry.getCalendar().get(Calendar.MONTH);
-//                int entWeek = entry.getCalendar().get(Calendar.WEEK_OF_MONTH);
                 int entDay = entry.getCalendar().get(Calendar.DAY_OF_YEAR);
                 int entHour = entry.getCalendar().get(Calendar.HOUR_OF_DAY);
                 if ((entHour == i) && (entDay == day)) {
@@ -301,8 +319,7 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispWeek() {
         Calendar calendar = Calendar.getInstance();
-        int month = calendar.get(Calendar.MONTH);
-        int week = calendar.get(Calendar.WEEK_OF_MONTH);
+        int week = 10;// calendar.get(Calendar.WEEK_OF_YEAR);
 
         DataPoint[] soilData = new DataPoint[7];
         DataPoint[] uvData = new DataPoint[7];
@@ -312,10 +329,9 @@ public class ControlPanelFragment extends Fragment {
             long avgUv = 0;
             long numEntries = 0;
             for (DataEntry entry : fbData) {
-                int entMonth = entry.getCalendar().get(Calendar.MONTH);
-                int entWeek = entry.getCalendar().get(Calendar.WEEK_OF_MONTH);
+                int entWeek = entry.getCalendar().get(Calendar.WEEK_OF_YEAR);
                 int entDay = entry.getCalendar().get(Calendar.DAY_OF_WEEK);
-                if ((entDay == i) && (entWeek == week) && (entMonth == month)) {
+                if ((entDay == i) && (entWeek == week)) {
                     avgSoil += entry.getSoilLvl();
                     avgUv += entry.getUvLvl();
                     numEntries++;
@@ -357,8 +373,8 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispMonth() {
         Calendar calendar = Calendar.getInstance();
-        int month = calendar.get(Calendar.MONTH);
-        int weekMax = calendar.get(Calendar.WEEK_OF_MONTH);
+        int month = Calendar.MARCH;// calendar.get(Calendar.MONTH);
+        int weekMax = 4;//calendar.get(Calendar.WEEK_OF_MONTH);
 
         DataPoint[] soilData = new DataPoint[weekMax];
         DataPoint[] uvData = new DataPoint[weekMax];
@@ -452,19 +468,6 @@ public class ControlPanelFragment extends Fragment {
         };
 
         setGraph(soilData, uvData, labelFormatter, 12);
-
-//        graphView.removeAllSeries();
-//        LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<DataPoint>(soilData);
-//        soilSeries.setTitle("Soil moisture level");
-//        soilSeries.setColor(ContextCompat.getColor(requireContext(), R.color.soil_graph));
-//
-//        LineGraphSeries<DataPoint> uvSeries = new LineGraphSeries<DataPoint>(uvData);
-//        uvSeries.setTitle("UV light exposure");
-//        uvSeries.setColor(ContextCompat.getColor(requireContext(), R.color.uv_graph));
-//
-//        graphView.addSeries(soilSeries);
-//
-//        graphView.addSeries(uvSeries);
     }
 
 
@@ -477,66 +480,34 @@ public class ControlPanelFragment extends Fragment {
      * @param numTicks Number of labels on the x-axis
      */
     private void setGraph(DataPoint[] soilData, DataPoint[] uvData, LabelFormatter labelFormatter, int numTicks) {
-//        DataPoint[] soilData = new DataPoint[fbData.size()];
-//        DataPoint[] uvData = new DataPoint[fbData.size()];
-//        for (int i = 0; i < fbData.size(); i++) { //fbData.size()
-//            DataEntry entry = fbData.get(i);
-//            soilData[i] = new DataPoint(entry.getDate(), entry.getSoilLvl());
-//            uvData[i] = new DataPoint(entry.getDate(), entry.getUvLvl());
-////            soilData[i] = new DataPoint(entry.getRecNo(), entry.getSoilLvl());
-////            uvData[i] = new DataPoint(entry.getRecNo(), entry.getUvLvl());
-//        }
 
         LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<DataPoint>(soilData);
-//        BarGraphSeries<DataPoint> soilSeries = new BarGraphSeries<DataPoint>(soilData);
         soilSeries.setTitle("Soil moisture level");
         soilSeries.setColor(ContextCompat.getColor(requireContext(), R.color.soil_graph));
 
         LineGraphSeries<DataPoint> uvSeries = new LineGraphSeries<DataPoint>(uvData);
-//        BarGraphSeries<DataPoint> uvSeries = new BarGraphSeries<DataPoint>(uvData);
         uvSeries.setTitle("UV light exposure");
         uvSeries.setColor(ContextCompat.getColor(requireContext(), R.color.uv_graph));
 
 
-        graphView.removeAllSeries();
-
-        // after adding data to our line graph series.
-        // on below line we are setting
-        // title for our graph view.
-        graphView.setTitle("Today");
-
-        // on below line we are setting
-        // text color to our graph view.
-//        graphView.setTitleColor(R.color.purple_200);
-
-        // on below line we are setting
-        // our title text size.
-        graphView.setTitleTextSize(18);
-
-
-
+        // Setup legend
         graphView.getLegendRenderer().setVisible(true);
         graphView.getLegendRenderer().setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background));
         graphView.getLegendRenderer().setAlign(LegendRenderer.LegendAlign.TOP);
 
+        // Setup labels
         graphView.getGridLabelRenderer().setLabelFormatter(labelFormatter);
-
-//        graphView.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(getActivity()));
-        graphView.getGridLabelRenderer().setNumHorizontalLabels(numTicks); // only 4 because of the space
-//        graphView.getGridLabelRenderer().setHumanRounding(false);
-
-        graphView.getViewport().setScrollable(true);
-//        graphView.getViewport().setScrollableY(false);
+        graphView.getGridLabelRenderer().setNumHorizontalLabels(numTicks);
         graphView.getGridLabelRenderer().setHorizontalLabelsAngle(90);
         graphView.getGridLabelRenderer().setLabelHorizontalHeight(100);
 
-//        graphView.getViewport().setScalable(true);
-//        graphView.getViewport().setScalableY(false);
+        graphView.getViewport().setScrollable(true);
+//        graphView.getViewport().setScrollableY(false);
 
-        // on below line we are adding
-        // data series to our graph view.
+
+        // Set data
+        graphView.removeAllSeries();
         graphView.addSeries(soilSeries);
-
         graphView.addSeries(uvSeries);
     }
 
