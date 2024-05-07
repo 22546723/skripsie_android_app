@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -33,16 +32,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @RequiresApi(api = Build.VERSION_CODES.S)
 public class BluetoothManager extends AppCompatActivity {
-    private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothLeScanner bluetoothLeScanner;
     private final Handler handler = new Handler();
     private boolean scanning = false;
-    private BluetoothDevice device;
     private final ScanFilter scanFilter;
     private final ScanSettings scanSettings;
     private BluetoothGatt bluetoothGatt;
@@ -51,35 +47,15 @@ public class BluetoothManager extends AppCompatActivity {
     private Activity activity;
 
     private final String[] permissionNames = {android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_ADVERTISE, Manifest.permission.BLUETOOTH_CONNECT};
-    private static final int[] permissionStatus = {0, 0, 0};
-
 
     private boolean isConnected;
     private boolean isTimeout;
 
 
-    private final String SERVICE_UUID_SCAN = "e1f6fa49-170d-4629-bd77-ea170a0309dc";
-    private final String CHARACTERISTIC_UUID_SCAN = "27ce423b-bcc6-4fe7-aa98-0d502e79f15a";
-    private final String CHARACTERISTIC_UUID_SCAN_NAME = "9a61b953-5e81-45f7-b998-4c54d213e710";
-    private final String CHARACTERISTIC_UUID_SCAN_NEW = "ffeca8e2-4285-4949-9819-66364ef72d25";
-
-    private final String SERVICE_UUID_WIFI_SELECT = "c3313912-4f44-4c5d-abe4-6a99dbe5274f";
-    private final String CHARACTERISTIC_UUID_WIFI_NAME = "62a140cc-0bcf-49da-94e3-fba705938272";
-    private final String CHARACTERISTIC_UUID_WIFI_NAME_2 = "2b8787a9-0908-48e5-90ed-18208cf9c197";
-    private final String CHARACTERISTIC_UUID_WIFI_PASSWORD = "1603d3a3-7500-4e90-8310-6e7b12e7bfa4";
-    private final String CHARACTERISTIC_UUID_WIFI_PASSWORD_2 = "55799be4-bdcf-4b97-ac6f-783dc4de4757";
-    private final String CHARACTERISTIC_UUID_WIFI_SET = "1675752a-2a8e-48e8-99ef-ee90ff878d0f";
-    private final String CHARACTERISTIC_UUID_WIFI_CONNECTED = "792920e9-f1ff-4587-879a-8cefb09c18d2";
-
-    private final String SERVICE_UUID_CONNECT = "a676b1bc-61f9-4af6-8dae-28831bad2ec6";
-    private final String CHARACTERISTIC_UUID_DEVICE = "9fbf707f-c39a-418a-828c-6e291af51ac4";
-
-    private BluetoothGattService scanService;
     private BluetoothGattCharacteristic scanName;
     private BluetoothGattCharacteristic scanNew;
     private BluetoothGattCharacteristic scanStatus;
 
-    private BluetoothGattService wifiService;
     private BluetoothGattCharacteristic wifiName;
     private BluetoothGattCharacteristic wifiName2;
     private BluetoothGattCharacteristic wifiPassword;
@@ -87,12 +63,7 @@ public class BluetoothManager extends AppCompatActivity {
     private BluetoothGattCharacteristic wifiSet;
     private BluetoothGattCharacteristic wifiConnected;
 
-    private BluetoothGattService connectService;
     private BluetoothGattCharacteristic connectName;
-
-    private boolean readWifiNew;
-    private boolean readWifiDone;
-    private String readWifiName;
 
     private boolean readDone;
     private boolean writeDone;
@@ -120,10 +91,8 @@ public class BluetoothManager extends AppCompatActivity {
         }
 
         // filter scan results to the device id
-        // TODO: replace device id with service uuid
         ScanFilter.Builder scanBuilder = new ScanFilter.Builder();
         scanBuilder.setDeviceAddress("40:4C:CA:41:59:0E");
-//        scanBuilder.setServiceUuid(ParcelUuid.fromString(SERVICE_UUID_CONNECT));
         scanFilter = scanBuilder.build();
 
         if (scanFilter == null) {
@@ -131,16 +100,9 @@ public class BluetoothManager extends AppCompatActivity {
         }
 
         // set scan mode to low latency (the scan is only running for +- 15sec)
-        // set the callback type to first match to avoid getting callbacks multiple times for each
-        // detected device
         ScanSettings.Builder settingsBuilder = new ScanSettings.Builder();
         settingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
-//        settingsBuilder.setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH);
         scanSettings = settingsBuilder.build();
-
-        if (scanSettings == null) {
-            Log.i("MINE", "scanSettings is null");
-        }
 
 
         // setup bt adapter
@@ -151,7 +113,6 @@ public class BluetoothManager extends AppCompatActivity {
             // Show turn on BT message
             // TODO: turn on bt automatically instead of showing a toast message
             Toast.makeText(context, "Please enable Bluetooth to continue.", Toast.LENGTH_SHORT).show();
-            Log.i("MINE", "bt not turned on");
         }
 
     }
@@ -164,27 +125,20 @@ public class BluetoothManager extends AppCompatActivity {
      * @see #leScanCallback
      */
     public void scanForDevice() {
-//        Log.i("MINE", "1");
         if (!scanning) {
-//            Log.i("MINE", "2");
             long SCAN_PERIOD = 10000; // 10 sec
 
-            // add a runnable to the handler that checks bt permission and stops the BT scan after SCAN_PERIOD milliseconds
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    scanning = false;
-                    // permission check and request
-                    if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
-                    }
-                    bluetoothLeScanner.stopScan(leScanCallback);
-                    if (!checkConnected()) {
-                        isTimeout = true;
-                    }
-//                    Log.i("MINE", "3");
-//                    if (!checkConnected())
-//                        Toast.makeText(context, "No Plant Helper device detected", Toast.LENGTH_SHORT).show();
+            // add a runnable to the handler that checks bt permission and stops the BT scan after
+            // SCAN_PERIOD milliseconds
+            runnable = () -> {
+                scanning = false;
+                // permission check and request
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
+                }
+                bluetoothLeScanner.stopScan(leScanCallback);
+                if (!checkConnected()) {
+                    isTimeout = true;
                 }
             };
 
@@ -195,14 +149,10 @@ public class BluetoothManager extends AppCompatActivity {
             isTimeout = false;
             isConnected = false;
             bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, leScanCallback);
-//            bluetoothLeScanner.startScan(null, scanSettings, leScanCallback);
-//            bluetoothLeScanner.startScan(leScanCallback);
-//            Log.i("MINE", "4");
         } else {
             //stop bt scan
             scanning = false;
             bluetoothLeScanner.stopScan(leScanCallback);
-//            Log.i("MINE", "5");
         }
     }
 
@@ -237,35 +187,27 @@ public class BluetoothManager extends AppCompatActivity {
             return "Name not found";
         }
 
-        return device.getName();
+        return readCharacteristic(connectName);
     }
 
 
     /**
-     * Read the WiFi network names sent by the esp32
+     * Initialize the esp32 WiFi scan and reads the detected networks
      *
-     * @return List of network names
+     * @return List of available network names
      */
     public List<String> readNetworks() {
         List<String> networks = new ArrayList<>();
-
-//        networks.add("Add names like this");
 
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
         }
 
-        // setup characteristics
-//        BluetoothGattService service = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_SCAN));
-//        BluetoothGattCharacteristic name = service.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NAME));
-//        BluetoothGattCharacteristic newName = service.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NEW));
-//        BluetoothGattCharacteristic scanStatus = service.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN));
-
-        // initialise scan
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // initialise scan
             writeCharacteristic(scanStatus, "1");
-//            bluetoothGatt.writeCharacteristic(scanStatus, "1".getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
 
+            // Read available networks
             String newName;
             String name;
             boolean done = false;
@@ -275,52 +217,34 @@ public class BluetoothManager extends AppCompatActivity {
                     name = readCharacteristic(scanName);
                     networks.add(name);
                     writeCharacteristic(scanNew, "0");
-//                    bluetoothGatt.writeCharacteristic(scanNew, "0".getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
 
                 }
                 if (readCharacteristic(scanStatus).equals("0")) {
                     done = true;
                 }
-
             }
         }
-//        String temp = sc
-//        readWifiDone = false;
-//        readWifiNew = false;
-
-//        while (!readWifiDone) {
-//            bluetoothGatt.readCharacteristic(scanNew);
-//            if (readWifiNew) {
-//                // read and add name
-//                bluetoothGatt.readCharacteristic(scanName);
-//                networks.add(readWifiName);
-//
-////                // set the new flag and characteristic to false
-////                readWifiNew = false;
-////                scanNew.setValue("0");
-//            }
-//        }
-
-
-
-
-        // remember to update the scan_new characteristic after reading each name
 
         return networks;
     }
 
 
+    /**
+     * Set the value of a BLE characteristic
+     *
+     * @param characteristic BLE characteristic to write to
+     * @param value Value to write to the characteristic
+     */
     @SuppressLint("MissingPermission")
     private void writeCharacteristic(BluetoothGattCharacteristic characteristic, String value) {
         writeDone = false;
-        int delay = 100; //100ms
+        int delay = 100; //ms
         final int[] writeCount = {0};
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             bluetoothGatt.writeCharacteristic(characteristic, value.getBytes(), BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         }
 
-//        Log.i("MINE", "s");
         while (!writeDone) {
             handler.postDelayed(new Runnable() {
                 @Override
@@ -339,15 +263,21 @@ public class BluetoothManager extends AppCompatActivity {
     }
 
 
+    /**
+     * Read the value of a BLE characteristic
+     *
+     * @param characteristic BLE characteristic to read
+     * @return Value of the characteristic
+     */
     @SuppressLint("MissingPermission")
     private String readCharacteristic(BluetoothGattCharacteristic characteristic) {
         readDone = false;
-        int delay = 100; //100ms
+        int delay = 100; //ms
         final int[] readCount = {0};
 
         bluetoothGatt.readCharacteristic(characteristic);
 
-//        Log.i("MINE", "s");
+        // 1 sec read delay
         while (!readDone) {
             handler.postDelayed(new Runnable() {
                 @Override
@@ -363,10 +293,16 @@ public class BluetoothManager extends AppCompatActivity {
                 }
             }, delay);
         }
-//        Log.i("MINE", "e");
-        return charVal;
+        return charVal;  // charVal gets set in the onCharacteristicRead callback
     }
 
+
+    /**
+     * Update the activity and context of this BluetoothManager
+     *
+     * @param a Activity
+     * @param c Context
+     */
     public void setActCont(Activity a, Context c) {
         activity = a;
         context = c;
@@ -380,16 +316,16 @@ public class BluetoothManager extends AppCompatActivity {
      * @param password Network password.
      * @return WiFi connection status (true if connected, false if not)
      */
-    public boolean connectWifi(String ssid, String password) {
-        boolean connected = false;
+    public boolean connectWifi(@NonNull String ssid, String password) {
+        boolean connected;
 
-
-
-        String name1 = "";
+        String name1;
         String name2 = "";
-        String password1 = "";
+        String password1;
         String password2 = "";
 
+        // The esp32 can only read up to 20 characters from a single characteristic, so long SSIDs
+        // and passwords need to be split up
         if (ssid.length() > 20) {
             name1 = ssid.substring(0, 20);
             name2 = ssid.substring(20);
@@ -397,8 +333,6 @@ public class BluetoothManager extends AppCompatActivity {
         else {
             name1 = ssid;
         }
-
-        Log.i("MINE", name1 + " | " + name2);
 
         if (password.length() > 20) {
             password1 = password.substring(0, 20);
@@ -408,32 +342,22 @@ public class BluetoothManager extends AppCompatActivity {
             password1 = password;
         }
 
-        Log.i("MINE", password1 + " | " + password2);
-
         writeCharacteristic(wifiName, name1);
         writeCharacteristic(wifiName2, name2);
         writeCharacteristic(wifiPassword, password1);
         writeCharacteristic(wifiPassword2, password2);
         writeCharacteristic(wifiSet, "1");
 
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        }, 100);
-
+        // Wait for the esp32 to finish attempting to connect to wifi
         boolean done = false;
-
         while (!done) {
             done = readCharacteristic(wifiSet).equals("0");
         }
 
         connected = readCharacteristic(wifiConnected).equals("1");
-        Log.i("MINE", readCharacteristic(wifiConnected));
-
         return connected;
     }
+
 
     /**
      * Check and request permissions.
@@ -450,48 +374,56 @@ public class BluetoothManager extends AppCompatActivity {
     }
 
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    /**
+     * Setup service and characteristic variables.
+     */
+    public void setupChars() {
+        // Setup scan service
+        String SERVICE_UUID_SCAN = "e1f6fa49-170d-4629-bd77-ea170a0309dc";
+        BluetoothGattService scanService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_SCAN));
+        String CHARACTERISTIC_UUID_SCAN_NAME = "9a61b953-5e81-45f7-b998-4c54d213e710";
+        scanName = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NAME));
+        String CHARACTERISTIC_UUID_SCAN_NEW = "ffeca8e2-4285-4949-9819-66364ef72d25";
+        scanNew = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NEW));
+        String CHARACTERISTIC_UUID_SCAN = "27ce423b-bcc6-4fe7-aa98-0d502e79f15a";
+        scanStatus = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN));
 
-        permissionStatus[requestCode] = grantResults[0];
+        // Setup WiFi service
+        String SERVICE_UUID_WIFI_SELECT = "c3313912-4f44-4c5d-abe4-6a99dbe5274f";
+        BluetoothGattService wifiService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_WIFI_SELECT));
+        String CHARACTERISTIC_UUID_WIFI_NAME = "62a140cc-0bcf-49da-94e3-fba705938272";
+        wifiName = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME));
+        String CHARACTERISTIC_UUID_WIFI_NAME_2 = "2b8787a9-0908-48e5-90ed-18208cf9c197";
+        wifiName2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME_2));
+        String CHARACTERISTIC_UUID_WIFI_PASSWORD = "1603d3a3-7500-4e90-8310-6e7b12e7bfa4";
+        wifiPassword = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD));
+        String CHARACTERISTIC_UUID_WIFI_PASSWORD_2 = "55799be4-bdcf-4b97-ac6f-783dc4de4757";
+        wifiPassword2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD_2));
+        String CHARACTERISTIC_UUID_WIFI_SET = "1675752a-2a8e-48e8-99ef-ee90ff878d0f";
+        wifiSet = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_SET));
+        String CHARACTERISTIC_UUID_WIFI_CONNECTED = "792920e9-f1ff-4587-879a-8cefb09c18d2";
+        wifiConnected = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_CONNECTED));
+
+        // Setup connect service
+        String SERVICE_UUID_CONNECT = "a676b1bc-61f9-4af6-8dae-28831bad2ec6";
+        BluetoothGattService connectService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_CONNECT));
+        String CHARACTERISTIC_UUID_DEVICE = "9fbf707f-c39a-418a-828c-6e291af51ac4";
+        connectName = connectService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_DEVICE));
+
+        isConnected = true;
     }
 
 
     /**
-     * Bluetooth LE scan callback.
-     * <p>
-     * Connects to the esp32 and stops the running bt scan on detection.
-     * @see #gattCallback
+     * Disconnect from the esp32
      */
-    private final ScanCallback leScanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-//            Log.i("MINE", "6");
-
-            // permission checks and requests
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
-                return;
-            }
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
-                return;
-            }
-
-            bluetoothLeScanner.stopScan(leScanCallback);
-            handler.removeCallbacks(runnable);
-
-
-            // connect to the esp32
-            device = result.getDevice();
-            bluetoothGatt = device.connectGatt(context, false, gattCallback);
-
+    public void disconnect() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
+            return;
         }
-    };
+        bluetoothGatt.disconnect();
+    }
 
 
     /**
@@ -510,18 +442,13 @@ public class BluetoothManager extends AppCompatActivity {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-//            Log.i("MINE", "at gatt callback");
-//            Log.i("MINE", String.valueOf(newState));
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 // successfully connected to the GATT Server
-//                setupChars(); // setup service and characteristic variables
-//                isConnected = true;
                 if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
                     return;
                 }
                 bluetoothGatt.discoverServices();
-//                Log.i("MINE", "connected");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
                 isConnected = false;
@@ -550,41 +477,33 @@ public class BluetoothManager extends AppCompatActivity {
 
 
     /**
-     * Setup service and characteristic variables.
+     * Bluetooth LE scan callback.
+     * <p>
+     * Connects to the esp32 and stops the running bt scan on detection.
+     * @see #gattCallback
      */
-    public void setupChars() {
-//        Log.i("MINE", "setup start");
-        scanService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_SCAN));
-        scanName = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NAME));
-        scanNew = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN_NEW));
-        scanStatus = scanService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_SCAN));
+    private final ScanCallback leScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
 
-//        Log.i("MINE", "setup 1");
-        wifiService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_WIFI_SELECT));
-        wifiName = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME));
-        wifiName2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_NAME_2));
-        wifiPassword = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD));
-        wifiPassword2 = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_PASSWORD_2));
-        wifiSet = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_SET));
-        wifiConnected = wifiService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_WIFI_CONNECTED));
+            // permission checks and requests
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[0]}, 0);
+                return;
+            }
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
+                return;
+            }
 
-//        Log.i("MINE", "setup 2");
-        connectService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_CONNECT));
-        connectName = connectService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_DEVICE));
-//        Log.i("MINE", "setup end");
+            bluetoothLeScanner.stopScan(leScanCallback);
+            handler.removeCallbacks(runnable);
 
-        isConnected = true;
-//        Log.i("MINE", "con set");
-    }
-
-
-    public void disconnect() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
-            return;
+            // connect to the esp32
+            BluetoothDevice device = result.getDevice();
+            bluetoothGatt = device.connectGatt(context, false, gattCallback);
         }
-        bluetoothGatt.disconnect();
-    }
-
+    };
 
 }

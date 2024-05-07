@@ -1,11 +1,11 @@
 package com.example.planthelper;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +27,7 @@ public class AddDeviceFragment extends Fragment {
     private Button btnScan;
     private TextView tvDevice;
     private ProgressBar spinner;
-    private static BluetoothManager bluetoothManager;
+    private BluetoothManager bluetoothManager; //TODO: recently changed from static, verify is everything still works
 
 
     @Override
@@ -37,13 +37,12 @@ public class AddDeviceFragment extends Fragment {
     ) {
 
         binding = FragmentAddDeviceBinding.inflate(inflater, container, false);
-
         requireActivity().setTitle("Connect to device");
 
         return binding.getRoot();
-
     }
 
+    @SuppressLint("SetTextI18n")
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -59,14 +58,12 @@ public class AddDeviceFragment extends Fragment {
         btnContinue.setEnabled(false);
         btnScan.setEnabled(true);
 
-        btnContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Log.i("MINE", "pre nav");
-                SettingsFragment.setBluetoothManager(bluetoothManager);
-                NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.action_addDeviceFragment_to_settingsFragment);
-            }
+        btnContinue.setOnClickListener(v -> {
+            // Send the connected bluetooth manager to the settings fragment
+            SettingsFragment.setBluetoothManager(bluetoothManager);
+
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_addDeviceFragment_to_settingsFragment);
         });
 
         btnScan.setOnClickListener(new View.OnClickListener() {
@@ -76,38 +73,29 @@ public class AddDeviceFragment extends Fragment {
                 Context c = getContext();
                 Activity a = getActivity();
 
-                if (a == null)
-                    Log.i("MINE", "empty activity in frag");
-                if (c == null)
-                    Log.i("MINE", "empty context in frag");
-                // TODO: remove this ^
-
                 spinner.setVisibility(View.VISIBLE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     bluetoothManager = new BluetoothManager(c, a);
-//                    bluetoothManager.disconnect();
-//                    Log.i("MINE", "pre scan");
                     bluetoothManager.scanForDevice();
-//                    Log.i("MINE", "post scan");
                     btnScan.setEnabled(false);
 
                     // check if the scan is done every checkDelay ms
                     Handler scanHandler = new Handler();
-                    int checkDelay = 100; // 100ms
+                    int checkDelay = 100; // ms
                     scanHandler.postDelayed(new Runnable() {
                         public void run() {
-//                            System.out.println("myHandler: here!"); // Do your work here
                             if (!(bluetoothManager.checkTimeout() || bluetoothManager.checkConnected())) {
+                                // Delay and check again
                                 scanHandler.postDelayed(this, checkDelay);
-//                                Log.i("MINE", ".");
                             } else {
+                                // Stop checking
                                 btnScan.setEnabled(true);
+
+                                // Display the connected device and enable the continue btn
                                 if (bluetoothManager.checkConnected()) {
-//                                    bluetoothManager.setupChars();
                                     tvDevice.setText(bluetoothManager.readName());
                                     spinner.setVisibility(View.GONE);
                                     btnContinue.setEnabled(true);
-//                                    Log.i("MINE", "meep");
                                 }
                             }
                         }
@@ -116,21 +104,12 @@ public class AddDeviceFragment extends Fragment {
             }
         });
 
-        Log.i("MINE", "great snakes batman!");
-
-        // TODO: display scan results?
-        // TODO: toggle buttons
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
         binding = null;
-    }
-
-    public static BluetoothManager getBluetoothManager() {
-        return bluetoothManager;
     }
 
 }

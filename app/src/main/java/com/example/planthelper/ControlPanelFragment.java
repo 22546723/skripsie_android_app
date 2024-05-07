@@ -46,9 +46,9 @@ public class ControlPanelFragment extends Fragment {
     private GraphView graphView;
     private FirebaseFirestore db;
 
-    private DatabaseReference nameRef;
+    private static DatabaseReference nameRef;
     private DatabaseReference targetRef;
-    private DatabaseReference updateRef;
+    private static DatabaseReference updateRef;
 
     private final List<DataEntry> fbData = new ArrayList<DataEntry>();
 
@@ -136,13 +136,12 @@ public class ControlPanelFragment extends Fragment {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 String value = snapshot.getValue(String.class);
-                Log.d("FBASE", "Value is: " + value);
+                SettingsFragment.setDeviceName(value);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 // Failed to read value
-                Log.w("FBASE", "Failed to read value.", error.toException());
             }
         });
 
@@ -196,6 +195,7 @@ public class ControlPanelFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 long value = snapshot.getValue(Long.class);
+
                 sbTarget.setProgress((int) value);
             }
 
@@ -502,7 +502,6 @@ public class ControlPanelFragment extends Fragment {
         graphView.getGridLabelRenderer().setLabelHorizontalHeight(100);
 
         graphView.getViewport().setScrollable(true);
-//        graphView.getViewport().setScrollableY(false);
 
 
         // Set data
@@ -532,6 +531,11 @@ public class ControlPanelFragment extends Fragment {
             Date d2 = o2.getDate();
             return (d1.compareTo(d2));
         }
+    }
+
+    public static void setDeviceName(String name) {
+        nameRef.setValue(name);
+        updateRef.setValue("1");
     }
 
 }

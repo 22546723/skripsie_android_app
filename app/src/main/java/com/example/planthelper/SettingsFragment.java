@@ -1,5 +1,6 @@
 package com.example.planthelper;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,8 @@ public class SettingsFragment extends Fragment {
     private EditText edtName;
     private TextView tvWifi;
     private static BluetoothManager bluetoothManager;
+    private static String deviceName = "Name not found";
+    private boolean editingName;
 
 
 
@@ -43,8 +46,6 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-
         btnSave = binding.btnSaveSettings;
         btnDelete = binding.btnDeleteDevice;
         ibtnName = binding.ibtnEditName;
@@ -52,31 +53,43 @@ public class SettingsFragment extends Fragment {
         edtName = binding.edtDeviceName;
         tvWifi = binding.tvWifiName;
 
-        ibtnWifi.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.action_settingsFragment_to_addWifiFragment);
+        // TODO: display wifi name
+
+        edtName.setText(deviceName);
+        // TODO: allow user to change device name
+
+        edtName.setEnabled(false);
+        editingName = false;
+        ibtnName.setOnClickListener(v -> {
+            if (editingName) {
+                ControlPanelFragment.setDeviceName(String.valueOf(edtName.getText()));
+                edtName.setEnabled(false);
+                editingName = false;
             }
+            else {
+                edtName.setEnabled(true);
+                editingName = true;
+            }
+
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: Add code to store data
-                NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.action_settingsFragment_to_controlPanel);
-                //MainActivity.setMenuItemVis(true);
-            }
+        ibtnWifi.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_settingsFragment_to_addWifiFragment);
         });
 
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Todo: Add code to delete device data
-                NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.action_settingsFragment_to_addDeviceFragment);
+        btnSave.setOnClickListener(v -> {
+            //Todo: Add code to store data
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                bluetoothManager.disconnect();
             }
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_settingsFragment_to_controlPanel);
+        });
+
+        btnDelete.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_settingsFragment_to_addDeviceFragment);
         });
 
     }
@@ -93,5 +106,9 @@ public class SettingsFragment extends Fragment {
 
     public static BluetoothManager getBluetoothManager() {
         return bluetoothManager;
+    }
+
+    public static void setDeviceName(String name) {
+        deviceName = name;
     }
 }
