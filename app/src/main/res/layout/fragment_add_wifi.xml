@@ -7,6 +7,17 @@
     android:layout_height="match_parent"
     tools:context=".AddWifiFragment">
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/spinner"
+        app:layout_constraintBottom_toBottomOf="@+id/rvWifi"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/rvWifi" />
+
     <TextView
         android:id="@+id/tvSelectLabel"
         android:layout_width="wrap_content"
@@ -74,17 +85,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edtPassword" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:progressDrawable="@drawable/spinner"
-        app:layout_constraintBottom_toBottomOf="@+id/rvWifi"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/rvWifi" />
 
     <Button
         android:id="@+id/btnCancelWifi"
