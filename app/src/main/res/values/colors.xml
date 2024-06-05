@@ -7,4 +7,5 @@
     <color name="red">#D00F0F</color>
     <color name="soil_graph">#C44F3111</color>
     <color name="uv_graph">#C41274C0</color>
+    <color name="cancel_disabled">#FFE37B7B</color>
 </resources>

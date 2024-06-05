@@ -90,7 +90,7 @@
         android:id="@+id/btnCancelWifi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/red"
+        android:backgroundTint="@color/btn_cancel_color"
         android:text="Cancel"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"

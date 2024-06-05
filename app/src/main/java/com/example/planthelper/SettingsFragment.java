@@ -4,6 +4,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -24,9 +25,8 @@ public class SettingsFragment extends Fragment {
     private Button btnSave, btnDelete;
     private ImageButton ibtnName, ibtnWifi;
     private EditText edtName;
-    private TextView tvWifi;
+    private static TextView tvWifi;
     private static BluetoothManager bluetoothManager;
-    private static String deviceName = "Name not found";
     private boolean editingName;
 
 
@@ -53,21 +53,31 @@ public class SettingsFragment extends Fragment {
         edtName = binding.edtDeviceName;
         tvWifi = binding.tvWifiName;
 
-        // TODO: display wifi name
 
-        edtName.setText(deviceName);
-        // TODO: allow user to change device name
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            tvWifi.setText(bluetoothManager.getConnectedSsid());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            edtName.setText(bluetoothManager.readName());
+        }
 
         edtName.setEnabled(false);
         editingName = false;
         ibtnName.setOnClickListener(v -> {
             if (editingName) {
-                ControlPanelFragment.setDeviceName(String.valueOf(edtName.getText()));
+                String name = String.valueOf(edtName.getText());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    bluetoothManager.setName(name);
+                }
+                ControlPanelFragment.setDeviceName(name);
                 edtName.setEnabled(false);
+                ibtnName.setImageResource(R.drawable.ic_edit);
                 editingName = false;
             }
             else {
                 edtName.setEnabled(true);
+                ibtnName.setImageResource(R.drawable.ic_save);
                 editingName = true;
             }
 
@@ -79,7 +89,6 @@ public class SettingsFragment extends Fragment {
         });
 
         btnSave.setOnClickListener(v -> {
-            //Todo: Add code to store data
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 bluetoothManager.disconnect();
             }
@@ -108,7 +117,4 @@ public class SettingsFragment extends Fragment {
         return bluetoothManager;
     }
 
-    public static void setDeviceName(String name) {
-        deviceName = name;
-    }
 }

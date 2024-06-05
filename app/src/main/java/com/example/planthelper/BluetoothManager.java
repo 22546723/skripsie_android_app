@@ -64,12 +64,17 @@ public class BluetoothManager extends AppCompatActivity {
     private BluetoothGattCharacteristic wifiConnected;
 
     private BluetoothGattCharacteristic connectName;
+    private BluetoothGattCharacteristic connectedSsid;
 
     private boolean readDone;
     private boolean writeDone;
     private String charVal;
 
     private Runnable runnable;
+
+    private boolean btOnFlag;
+
+    private int numConnects = 0;
 
 
     /**
@@ -109,12 +114,18 @@ public class BluetoothManager extends AppCompatActivity {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter.isEnabled()) {
             bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+            btOnFlag = true;
         } else {
             // Show turn on BT message
             // TODO: turn on bt automatically instead of showing a toast message
             Toast.makeText(context, "Please enable Bluetooth to continue.", Toast.LENGTH_SHORT).show();
+            btOnFlag = false;
         }
 
+    }
+
+    public boolean isBtOn() {
+        return btOnFlag;
     }
 
 
@@ -125,6 +136,10 @@ public class BluetoothManager extends AppCompatActivity {
      * @see #leScanCallback
      */
     public void scanForDevice() {
+//        isConnected = bluetoothGatt != null;
+        boolean check = checkConnected();
+        boolean check2 = bluetoothGatt == null;
+
         if (!scanning) {
             long SCAN_PERIOD = 10000; // 10 sec
 
@@ -147,7 +162,7 @@ public class BluetoothManager extends AppCompatActivity {
             // start the bt scan
             scanning = true;
             isTimeout = false;
-            isConnected = false;
+//            isConnected = false;
             bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, leScanCallback);
         } else {
             //stop bt scan
@@ -184,10 +199,18 @@ public class BluetoothManager extends AppCompatActivity {
     public String readName() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
-            return "Name not found";
+//            return "Name not found";
         }
 
         return readCharacteristic(connectName);
+    }
+
+    public void setName(String name) {
+        writeCharacteristic(connectName, name);
+    }
+
+    public String getConnectedSsid() {
+        return readCharacteristic(connectedSsid);
     }
 
 
@@ -409,6 +432,8 @@ public class BluetoothManager extends AppCompatActivity {
         BluetoothGattService connectService = bluetoothGatt.getService(UUID.fromString(SERVICE_UUID_CONNECT));
         String CHARACTERISTIC_UUID_DEVICE = "9fbf707f-c39a-418a-828c-6e291af51ac4";
         connectName = connectService.getCharacteristic(UUID.fromString(CHARACTERISTIC_UUID_DEVICE));
+        String CHARACTERISTIC_CONNECTED_SSID = "ee2a9fb2-7f5b-4b84-be0b-b54e4c7e2863";
+        connectedSsid = connectService.getCharacteristic(UUID.fromString(CHARACTERISTIC_CONNECTED_SSID));
 
         isConnected = true;
     }
@@ -422,7 +447,9 @@ public class BluetoothManager extends AppCompatActivity {
             ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
             return;
         }
-        bluetoothGatt.disconnect();
+        if (bluetoothGatt != null) {
+            bluetoothGatt.disconnect();
+        }
     }
 
 
@@ -448,9 +475,18 @@ public class BluetoothManager extends AppCompatActivity {
                     ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
                     return;
                 }
+//                isConnected = true;
                 bluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 // disconnected from the GATT Server
+//                if (bluetoothGatt == null) {
+//                    return;
+//                }
+
+                bluetoothGatt.close();
+                bluetoothGatt = null;
+                boolean temp = bluetoothGatt == null;
+//                bluetoothGatt = null;
                 isConnected = false;
             }
         }
@@ -500,9 +536,28 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothLeScanner.stopScan(leScanCallback);
             handler.removeCallbacks(runnable);
 
+            int temp = 0;
+            if (bluetoothGatt != null) {
+                temp = 1;
+                return;
+            }
+
+            if (checkConnected()) {
+                temp = 2;
+                return;
+            }
+
             // connect to the esp32
             BluetoothDevice device = result.getDevice();
-            bluetoothGatt = device.connectGatt(context, false, gattCallback);
+
+            if (device == null) {
+                Toast.makeText(context, "Device unavailable, please restart the Plant Helper device.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                numConnects += 1;
+                bluetoothGatt = device.connectGatt(context, false, gattCallback);
+            }
+
         }
     };
 

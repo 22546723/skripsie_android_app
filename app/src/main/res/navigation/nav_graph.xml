@@ -37,6 +37,9 @@
         <action
             android:id="@+id/action_addDeviceFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_addDeviceFragment_to_controlPanel"
+            app:destination="@id/controlPanel" />
     </fragment>
     <fragment
         android:id="@+id/addWifiFragment"

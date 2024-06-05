@@ -136,7 +136,7 @@ public class ControlPanelFragment extends Fragment {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 String value = snapshot.getValue(String.class);
-                SettingsFragment.setDeviceName(value);
+                requireActivity().setTitle(value);
             }
 
             @Override
@@ -266,7 +266,7 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispDay() {
         Calendar calendar = Calendar.getInstance();
-        int day = 64; // calendar.get(Calendar.DAY_OF_YEAR);
+        int day = calendar.get(Calendar.DAY_OF_YEAR); // 64;
 
         DataPoint[] soilData = new DataPoint[24];
         DataPoint[] uvData = new DataPoint[24];
@@ -319,7 +319,7 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispWeek() {
         Calendar calendar = Calendar.getInstance();
-        int week = 10;// calendar.get(Calendar.WEEK_OF_YEAR);
+        int week = calendar.get(Calendar.WEEK_OF_YEAR); //10;
 
         DataPoint[] soilData = new DataPoint[7];
         DataPoint[] uvData = new DataPoint[7];
@@ -373,7 +373,7 @@ public class ControlPanelFragment extends Fragment {
      */
     private void dispMonth() {
         Calendar calendar = Calendar.getInstance();
-        int month = Calendar.MARCH;// calendar.get(Calendar.MONTH);
+        int month = calendar.get(Calendar.MONTH); //Calendar.MARCH;
         int weekMax = 4;//calendar.get(Calendar.WEEK_OF_MONTH);
 
         DataPoint[] soilData = new DataPoint[weekMax];
