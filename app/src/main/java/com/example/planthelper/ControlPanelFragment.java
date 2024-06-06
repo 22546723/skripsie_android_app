@@ -1,5 +1,6 @@
 package com.example.planthelper;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,11 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -39,6 +43,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ControlPanelFragment extends Fragment {
 
@@ -58,6 +63,11 @@ public class ControlPanelFragment extends Fragment {
     private TextView tvUvLive;
     private Spinner spnTimeframe;
 
+    private Button btnDate;
+    private CalendarView calendarView;
+    private Calendar calendar;
+
+    private int dispType;
 
 
     @Override
@@ -78,6 +88,7 @@ public class ControlPanelFragment extends Fragment {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         graphView = binding.idGraphView;
@@ -87,6 +98,11 @@ public class ControlPanelFragment extends Fragment {
         tvUvLive = binding.tvLightLive;
         spnTimeframe = binding.spnTimeframe;
 
+        btnDate = binding.btnDate;
+        calendarView = binding.calendarView;
+        calendarView.setVisibility(View.GONE);
+        calendar = Calendar.getInstance();
+
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
                 R.array.timeframe_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -94,23 +110,13 @@ public class ControlPanelFragment extends Fragment {
 
         spnTimeframe.setEnabled(false);
         spnTimeframe.setSelection(0);
+        dispType = 0;
 
         spnTimeframe.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0: dispDay();
-                        break;
-
-                    case 1: dispWeek();
-                        break;
-
-                    case 2: dispMonth();
-                        break;
-
-                    case 3: dispYear();
-                        break;
-                }
+                dispType = position;
+                updateDisplay();
             }
 
             @Override
@@ -205,6 +211,38 @@ public class ControlPanelFragment extends Fragment {
             }
         });
 
+
+        calendarView.setDate(calendar.getTimeInMillis());
+        calendarView.setMaxDate(calendar.getTimeInMillis());
+        String today = (calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT_FORMAT, Locale.ENGLISH));
+        btnDate.setText(today);
+
+        calendarView.setOnDateChangeListener((view1, year, month, dayOfMonth) -> {
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            calendar.set(Calendar.YEAR, year);
+            String day = (dayOfMonth + " " + calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT_FORMAT, Locale.ENGLISH));
+            btnDate.setText(day);
+
+            calendarView.setVisibility(View.GONE);
+            graphView.setVisibility(View.VISIBLE);
+            updateDisplay();
+        });
+
+        btnDate.setOnClickListener(v -> {
+
+            if (calendarView.getVisibility() == View.GONE) {
+                graphView.setVisibility(View.GONE);
+                calendarView.setVisibility(View.VISIBLE);
+            }
+//            else {
+//                calendarView.setVisibility(View.GONE);
+//                graphView.setVisibility(View.VISIBLE);
+//                updateDisplay();
+//            }
+
+        });
+
         readFirestoreData();
     }
 
@@ -215,6 +253,22 @@ public class ControlPanelFragment extends Fragment {
         requireActivity().invalidateOptionsMenu();
 
         binding = null;
+    }
+
+    private void updateDisplay() {
+        switch (dispType) {
+            case 0: dispDay();
+                break;
+
+            case 1: dispWeek();
+                break;
+
+            case 2: dispMonth();
+                break;
+
+            case 3: dispYear();
+                break;
+        }
     }
 
 
@@ -265,7 +319,7 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispDay() {
-        Calendar calendar = Calendar.getInstance();
+//        Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_YEAR); // 64;
 
         DataPoint[] soilData = new DataPoint[24];
@@ -318,7 +372,7 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispWeek() {
-        Calendar calendar = Calendar.getInstance();
+//        Calendar calendar = Calendar.getInstance();
         int week = calendar.get(Calendar.WEEK_OF_YEAR); //10;
 
         DataPoint[] soilData = new DataPoint[7];
@@ -372,7 +426,7 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispMonth() {
-        Calendar calendar = Calendar.getInstance();
+//        Calendar calendar = Calendar.getInstance();
         int month = calendar.get(Calendar.MONTH); //Calendar.MARCH;
         int weekMax = 4;//calendar.get(Calendar.WEEK_OF_MONTH);
 

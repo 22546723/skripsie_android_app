@@ -12,11 +12,15 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
+
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="90dp"
-            android:background="@color/highlight" />
+            android:layout_height="wrap_content"
+            android:background="@color/dark_green"
+            app:logo="@mipmap/ic_logo"
+            app:titleCentered="true"
+            app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

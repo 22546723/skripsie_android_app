@@ -8,4 +8,5 @@
     <color name="soil_graph">#C44F3111</color>
     <color name="uv_graph">#C41274C0</color>
     <color name="cancel_disabled">#FFE37B7B</color>
+    <color name="dark_green">#45603E</color>
 </resources>

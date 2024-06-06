@@ -49,7 +49,7 @@
 
 
     <string-array name="timeframe_array">
-        <item>Today</item>
+        <item>Day</item>
         <item>Week</item>
         <item>Month</item>
         <item>Year</item>
