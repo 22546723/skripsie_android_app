@@ -1,14 +1,16 @@
 package com.example.planthelper;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.planthelper.databinding.WifiCardBinding;
+
 import java.util.List;
 
 /**
@@ -89,17 +91,14 @@ public class wifiAdapter extends RecyclerView.Adapter<wifiAdapter.viewHolder> {
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
         holder.getTvName().setText(networks.get(position));
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // update selected network
-                prevSelected = selected;
-                selected = holder.getAdapterPosition();
+        holder.itemView.setOnClickListener(v -> {
+            // update selected network
+            prevSelected = selected;
+            selected = holder.getAdapterPosition();
 
-                // call onBindViewHolder to update the cards
-                notifyItemChanged(selected);
-                notifyItemChanged(prevSelected);
-            }
+            // call onBindViewHolder to update the cards
+            notifyItemChanged(selected);
+            notifyItemChanged(prevSelected);
         });
 
         // set card appearance to indicate selection

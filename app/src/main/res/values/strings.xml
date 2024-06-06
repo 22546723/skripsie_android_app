@@ -46,6 +46,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_device_welcome_text">Please connect to your device using Bluetooth to continue.</string>
+    <string name="detected_device">Detected device:</string>
+    <string name="device_name">Device name</string>
+    <string name="scan">Scan</string>
+    <string name="cancel">Cancel</string>
+    <string name="continue_str">Continue</string>
+    <string name="select_a_wifi_network">Select a WiFi network:</string>
+    <string name="enter_password">Enter password:</string>
+    <string name="continue">Continue</string>
+    <string name="password_field">Password field</string>
+    <string name="soil_moisture_level">Soil moisture level:</string>
+    <string name="uv_light_exposure">UV light exposure:</string>
+    <string name="_78">78%</string>
+    <string name="_10">10%</string>
+    <string name="select_date">Select date</string>
+    <string name="set_target_soil_moisture_level">Set target soil moisture level:</string>
+    <string name="_80">80%</string>
 
 
     <string-array name="timeframe_array">

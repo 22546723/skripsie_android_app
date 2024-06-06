@@ -20,8 +20,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.planthelper.databinding.FragmentControlPanelBinding;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,7 +27,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.LabelFormatter;
@@ -41,7 +38,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -55,7 +51,7 @@ public class ControlPanelFragment extends Fragment {
     private DatabaseReference targetRef;
     private static DatabaseReference updateRef;
 
-    private final List<DataEntry> fbData = new ArrayList<DataEntry>();
+    private final List<DataEntry> fbData = new ArrayList<>();
 
     private SeekBar sbTarget;
     private TextView tvTarget;
@@ -235,11 +231,6 @@ public class ControlPanelFragment extends Fragment {
                 graphView.setVisibility(View.GONE);
                 calendarView.setVisibility(View.VISIBLE);
             }
-//            else {
-//                calendarView.setVisibility(View.GONE);
-//                graphView.setVisibility(View.VISIBLE);
-//                updateDisplay();
-//            }
 
         });
 
@@ -255,6 +246,10 @@ public class ControlPanelFragment extends Fragment {
         binding = null;
     }
 
+
+    /**
+     * Update the graph
+     */
     private void updateDisplay() {
         switch (dispType) {
             case 0: dispDay();
@@ -282,33 +277,30 @@ public class ControlPanelFragment extends Fragment {
 
         db.collection("data")
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                // Read the fields
-                                long soil = (long) document.get("soil");
-                                long uv = (long) document.get("uv");
-                                String timestamp = (String) document.get("timestamp");
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            // Read the fields
+                            long soil = (long) document.get("soil");
+                            long uv = (long) document.get("uv");
+                            String timestamp = (String) document.get("timestamp");
 
-                                // Create a new DataEntry and add it to fbData
-                                try {
-                                    DataEntry dataEntry = new DataEntry(document.getId(), soil, uv, timestamp);
-                                    fbData.add(dataEntry);
-                                } catch (ParseException e) {
-                                    throw new RuntimeException(e);
-                                }
+                            // Create a new DataEntry and add it to fbData
+                            try {
+                                DataEntry dataEntry = new DataEntry(document.getId(), soil, uv, timestamp);
+                                fbData.add(dataEntry);
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
                             }
-
-                            // sort the data
-                            fbData.sort(new recNoCompare());
-                            dispDay();
-
-                            spnTimeframe.setEnabled(true);
-                        } else {
-                            Log.w("FBASE", "Error getting documents.", task.getException());
                         }
+
+                        // sort the data
+                        fbData.sort(new recNoCompare());
+                        dispDay();
+
+                        spnTimeframe.setEnabled(true);
+                    } else {
+                        Log.w("FBASE", "Error getting documents.", task.getException());
                     }
                 });
     }
@@ -319,8 +311,7 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispDay() {
-//        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_YEAR); // 64;
+        int day = calendar.get(Calendar.DAY_OF_YEAR);
 
         DataPoint[] soilData = new DataPoint[24];
         DataPoint[] uvData = new DataPoint[24];
@@ -353,10 +344,10 @@ public class ControlPanelFragment extends Fragment {
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
                     // show normal x values
-                    return (String.valueOf((int)value) + ":00"); // super.formatLabel(value, isValueX);
+                    return ((int) value + ":00"); // super.formatLabel(value, isValueX);
                 } else {
                     // show currency for y values
-                    return super.formatLabel(value, isValueX);
+                    return super.formatLabel(value, false);
                 }
 
             }
@@ -372,8 +363,7 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispWeek() {
-//        Calendar calendar = Calendar.getInstance();
-        int week = calendar.get(Calendar.WEEK_OF_YEAR); //10;
+        int week = calendar.get(Calendar.WEEK_OF_YEAR);
 
         DataPoint[] soilData = new DataPoint[7];
         DataPoint[] uvData = new DataPoint[7];
@@ -410,7 +400,7 @@ public class ControlPanelFragment extends Fragment {
                     return days[(int) value]; // super.formatLabel(value, isValueX);
                 } else {
                     // show currency for y values
-                    return super.formatLabel(value, isValueX);
+                    return super.formatLabel(value, false);
                 }
 
             }
@@ -426,9 +416,8 @@ public class ControlPanelFragment extends Fragment {
      * @see #setGraph(DataPoint[], DataPoint[], LabelFormatter, int)
      */
     private void dispMonth() {
-//        Calendar calendar = Calendar.getInstance();
-        int month = calendar.get(Calendar.MONTH); //Calendar.MARCH;
-        int weekMax = 4;//calendar.get(Calendar.WEEK_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int weekMax = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
 
         DataPoint[] soilData = new DataPoint[weekMax];
         DataPoint[] uvData = new DataPoint[weekMax];
@@ -464,7 +453,7 @@ public class ControlPanelFragment extends Fragment {
                     return String.valueOf((int)value); // super.formatLabel(value, isValueX);
                 } else {
                     // show currency for y values
-                    return super.formatLabel(value, isValueX);
+                    return super.formatLabel(value, false);
                 }
 
             }
@@ -515,7 +504,7 @@ public class ControlPanelFragment extends Fragment {
                     return months[(int) value]; // super.formatLabel(value, isValueX);
                 } else {
                     // show currency for y values
-                    return super.formatLabel(value, isValueX);
+                    return super.formatLabel(value, false);
                 }
 
             }
@@ -535,11 +524,11 @@ public class ControlPanelFragment extends Fragment {
      */
     private void setGraph(DataPoint[] soilData, DataPoint[] uvData, LabelFormatter labelFormatter, int numTicks) {
 
-        LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<DataPoint>(soilData);
+        LineGraphSeries<DataPoint> soilSeries = new LineGraphSeries<>(soilData);
         soilSeries.setTitle("Soil moisture level");
         soilSeries.setColor(ContextCompat.getColor(requireContext(), R.color.soil_graph));
 
-        LineGraphSeries<DataPoint> uvSeries = new LineGraphSeries<DataPoint>(uvData);
+        LineGraphSeries<DataPoint> uvSeries = new LineGraphSeries<>(uvData);
         uvSeries.setTitle("UV light exposure");
         uvSeries.setColor(ContextCompat.getColor(requireContext(), R.color.uv_graph));
 
@@ -572,18 +561,6 @@ public class ControlPanelFragment extends Fragment {
         @Override
         public int compare(DataEntry o1, DataEntry o2) {
             return (int) (o1.getRecNo() - o2.getRecNo());
-        }
-    }
-
-    /**
-     * Compare dates of DataEntry objects to sort
-     */
-    private static class dateCompare implements Comparator<DataEntry> {
-        @Override
-        public int compare(DataEntry o1, DataEntry o2) {
-            Date d1 = o1.getDate();
-            Date d2 = o2.getDate();
-            return (d1.compareTo(d2));
         }
     }
 

@@ -72,9 +72,7 @@ public class BluetoothManager extends AppCompatActivity {
 
     private Runnable runnable;
 
-    private boolean btOnFlag;
-
-    private int numConnects = 0;
+    private final boolean btOnFlag;
 
 
     /**
@@ -117,7 +115,6 @@ public class BluetoothManager extends AppCompatActivity {
             btOnFlag = true;
         } else {
             // Show turn on BT message
-            // TODO: turn on bt automatically instead of showing a toast message
             Toast.makeText(context, "Please enable Bluetooth to continue.", Toast.LENGTH_SHORT).show();
             btOnFlag = false;
         }
@@ -136,9 +133,6 @@ public class BluetoothManager extends AppCompatActivity {
      * @see #leScanCallback
      */
     public void scanForDevice() {
-//        isConnected = bluetoothGatt != null;
-        boolean check = checkConnected();
-        boolean check2 = bluetoothGatt == null;
 
         if (!scanning) {
             long SCAN_PERIOD = 10000; // 10 sec
@@ -162,7 +156,6 @@ public class BluetoothManager extends AppCompatActivity {
             // start the bt scan
             scanning = true;
             isTimeout = false;
-//            isConnected = false;
             bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, leScanCallback);
         } else {
             //stop bt scan
@@ -199,7 +192,6 @@ public class BluetoothManager extends AppCompatActivity {
     public String readName() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
-//            return "Name not found";
         }
 
         return readCharacteristic(connectName);
@@ -475,18 +467,12 @@ public class BluetoothManager extends AppCompatActivity {
                     ActivityCompat.requestPermissions(activity, new String[]{permissionNames[2]}, 2);
                     return;
                 }
-//                isConnected = true;
+
                 bluetoothGatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                // disconnected from the GATT Server
-//                if (bluetoothGatt == null) {
-//                    return;
-//                }
 
                 bluetoothGatt.close();
                 bluetoothGatt = null;
-                boolean temp = bluetoothGatt == null;
-//                bluetoothGatt = null;
                 isConnected = false;
             }
         }
@@ -536,14 +522,12 @@ public class BluetoothManager extends AppCompatActivity {
             bluetoothLeScanner.stopScan(leScanCallback);
             handler.removeCallbacks(runnable);
 
-            int temp = 0;
+
             if (bluetoothGatt != null) {
-                temp = 1;
                 return;
             }
 
             if (checkConnected()) {
-                temp = 2;
                 return;
             }
 
@@ -554,7 +538,6 @@ public class BluetoothManager extends AppCompatActivity {
                 Toast.makeText(context, "Device unavailable, please restart the Plant Helper device.", Toast.LENGTH_SHORT).show();
             }
             else {
-                numConnects += 1;
                 bluetoothGatt = device.connectGatt(context, false, gattCallback);
             }
 

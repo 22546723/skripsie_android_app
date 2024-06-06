@@ -1,14 +1,8 @@
 package com.example.planthelper;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,15 +11,19 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+
 import com.example.planthelper.databinding.FragmentSettingsBinding;
 
 
 public class SettingsFragment extends Fragment {
     private FragmentSettingsBinding binding;
-    private Button btnSave, btnDelete;
-    private ImageButton ibtnName, ibtnWifi;
+    private ImageButton ibtnName;
     private EditText edtName;
-    private static TextView tvWifi;
+    @SuppressLint("StaticFieldLeak")
     private static BluetoothManager bluetoothManager;
     private boolean editingName;
 
@@ -46,12 +44,12 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        btnSave = binding.btnSaveSettings;
-        btnDelete = binding.btnDeleteDevice;
+        Button btnSave = binding.btnSaveSettings;
+        Button btnDelete = binding.btnDeleteDevice;
         ibtnName = binding.ibtnEditName;
-        ibtnWifi = binding.ibtnEditWifi;
+        ImageButton ibtnWifi = binding.ibtnEditWifi;
         edtName = binding.edtDeviceName;
-        tvWifi = binding.tvWifiName;
+        TextView tvWifi = binding.tvWifiName;
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

@@ -8,7 +8,6 @@ public class DataEntry {
     private final double recNo;
     private final long soilLvl;
     private final long uvLvl;
-    private final Date date;
     private final Calendar calendar;
 
 
@@ -27,7 +26,7 @@ public class DataEntry {
         this.uvLvl = uv;
 
         long temp2 = Long.parseLong(timestamp) * 1000;
-        this.date = new Date(temp2);
+        Date date = new Date(temp2);
         this.calendar = Calendar.getInstance();
         this.calendar.setTime(date);
     }
@@ -42,10 +41,6 @@ public class DataEntry {
 
     public double getUvLvl() {
         return uvLvl;
-    }
-
-    public Date getDate() {
-        return date;
     }
 
     public Calendar getCalendar() {

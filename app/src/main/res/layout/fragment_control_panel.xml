@@ -41,7 +41,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
-                android:text="Soil moisture level:" />
+                android:text="@string/soil_moisture_level" />
 
             <TextView
                 android:id="@+id/tvLightLabel"
@@ -52,7 +52,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
-                android:text="UV light exposure:" />
+                android:text="@string/uv_light_exposure" />
 
             <TextView
                 android:id="@+id/tvSoilLive"
@@ -68,7 +68,7 @@
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_toStartOf="@id/divider"
-                android:text="78%"
+                android:text="@string/_78"
                 android:textAlignment="center"
                 android:textSize="34sp" />
 
@@ -84,7 +84,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="10%"
+                android:text="@string/_10"
                 android:textAlignment="center"
                 android:textSize="34sp" />
         </RelativeLayout>
@@ -104,19 +104,6 @@
         app:layout_constraintTop_toBottomOf="@+id/cvLive"
         app:layout_constraintVertical_bias="0.0">
 
-<!--        <com.google.android.material.tabs.TabLayout-->
-<!--            android:id="@+id/tab_layout"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:contentDescription="Graph" />-->
-
-<!--        <androidx.viewpager2.widget.ViewPager2-->
-<!--            android:id="@+id/pager"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="0dp"-->
-<!--            android:layout_weight="1" />-->
-
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -135,7 +122,7 @@
             <Spinner
                 android:id="@+id/spnTimeframe"
                 android:layout_width="150dp"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="false"
@@ -147,13 +134,14 @@
             <Button
                 android:id="@+id/btnDate"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
                 android:backgroundTint="@color/btn_background_color"
-                android:text="Select date"
+                android:maxWidth="200dp"
+                android:text="@string/select_date"
                 android:textColor="@color/btn_text_color" />
 
             <CalendarView
@@ -196,7 +184,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_margin="10dp"
-                android:text="Set target soil moisture level:" />
+                android:text="@string/set_target_soil_moisture_level" />
 
             <SeekBar
                 android:id="@+id/sbTarget"
@@ -222,7 +210,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
                 android:layout_toEndOf="@+id/sbTarget"
-                android:text="80%"
+                android:text="@string/_80"
                 android:textAlignment="center"
                 android:textSize="34sp" />
         </RelativeLayout>
