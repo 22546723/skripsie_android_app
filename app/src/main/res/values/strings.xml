@@ -53,7 +53,6 @@
     <string name="continue_str">Continue</string>
     <string name="select_a_wifi_network">Select a WiFi network:</string>
     <string name="enter_password">Enter password:</string>
-    <string name="continue">Continue</string>
     <string name="password_field">Password field</string>
     <string name="soil_moisture_level">Soil moisture level:</string>
     <string name="uv_light_exposure">UV light exposure:</string>
